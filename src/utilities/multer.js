@@ -32,6 +32,20 @@ const blogPicStorage = multer.diskStorage({
     }
 });
 // Storage engine for service pictures
+const TeamPicStorage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const dir = "src/uploads/team-pics/";
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true }); // Create the directory if it doesn't exist
+        }
+        cb(null, dir);
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + path.extname(file.originalname));
+    }
+});
+// Storage engine for service pictures
 const servicePicStorage = multer.diskStorage({
     destination: function (req, file, cb) {
         const dir = "src/uploads/service-pics/";
@@ -45,6 +59,8 @@ const servicePicStorage = multer.diskStorage({
         cb(null, uniqueSuffix + path.extname(file.originalname));
     }
 });
+
+
 
 // File filter (common for both profile and blog images)
 const fileFilter = (req, file, cb) => {
@@ -75,6 +91,11 @@ export const uploadBlogPic = multer({
 // Upload for service pictures
 export const uploadServicePic = multer({
     storage: servicePicStorage,
+    limits: { fileSize: 1024 * 1024 * 5 }, // Limit file size to 5MB
+    fileFilter: fileFilter
+});
+export const uploadTeamMemberPic = multer({
+    storage: TeamPicStorage,
     limits: { fileSize: 1024 * 1024 * 5 }, // Limit file size to 5MB
     fileFilter: fileFilter
 });
