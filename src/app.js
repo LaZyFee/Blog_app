@@ -7,6 +7,8 @@ import { fileURLToPath } from "url";
 
 //routes import
 import userRoute from './routes/userRoute.js'
+import serviceRoute from './routes/serviceRoute.js'
+import blogRoute from './routes/blogRoute.js'
 
 configDotenv();
 
@@ -24,6 +26,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 //route
 app.use('/api/v1', userRoute)
+app.use('/api/v1', serviceRoute)
+app.use('/api/v1', blogRoute)
 
 
 export default app

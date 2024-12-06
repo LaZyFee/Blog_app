@@ -14,3 +14,12 @@ export const generateToken = (user) => {
 
     return token;
 };
+
+export const TokenDecode = (token) => {
+    try {
+        return jwt.verify(token, process.env.JWT_SECRET);
+    }
+    catch (e) {
+        return null;
+    }
+};

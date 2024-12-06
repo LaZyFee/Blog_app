@@ -1,4 +1,4 @@
-import { generateToken } from "../middlewares/generateToken.js";
+import { generateToken } from "../utilities/generateToken.js";
 import { UserModel } from "../models/userModel.js";
 import bcrypt from 'bcrypt'
 

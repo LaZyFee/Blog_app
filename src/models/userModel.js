@@ -6,7 +6,7 @@ const UserSchema = mongoose.Schema({
     password: { type: String, required: true },
     profilepic: { type: String },
     role: { type: String, enum: ['admin', 'user'], default: 'user' },
-    author: { type: Boolean, default: false }
+    author: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Blog' }],
 },
     { timestamps: true }
 );
