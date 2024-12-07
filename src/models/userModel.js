@@ -7,6 +7,7 @@ const UserSchema = mongoose.Schema({
     profilepic: { type: String },
     role: { type: String, enum: ['admin', 'user'], default: 'user' },
     author: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Blog' }],
+    team: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Team' }]
 },
     { timestamps: true }
 );

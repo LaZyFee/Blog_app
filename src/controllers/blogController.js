@@ -1,5 +1,6 @@
 import { BlogModel } from "../models/blogModel.js";
 import { UserModel } from "../models/userModel.js";
+import fs from "fs";
 
 export const CreateBlog = async (req, res) => {
     try {
@@ -123,17 +124,30 @@ export const UpdateBlog = async (req, res) => {
     }
 }
 
+
 export const DeleteBlog = async (req, res) => {
     try {
         const blogId = req.params.id;
 
-        // Find the blog to get the creator's user ID
+        // Find the blog to get the image path and creator's user ID
         const blog = await BlogModel.findById(blogId);
         if (!blog) {
             return res.status(404).json({ message: "Blog not found" });
         }
 
         const userId = blog.createdBy;
+        const imagePath = blog.image;
+
+        // Remove the image file from the server if it exists
+        if (imagePath) {
+            fs.unlink(imagePath, (err) => {
+                if (err) {
+                    console.error("Error deleting image file:", err);
+                } else {
+                    console.log("Image file deleted successfully.");
+                }
+            });
+        }
 
         // Delete the blog
         await BlogModel.findByIdAndDelete(blogId);
@@ -141,12 +155,13 @@ export const DeleteBlog = async (req, res) => {
         // Remove the blog ID from the user's author array
         await UserModel.findByIdAndUpdate(userId, { $pull: { author: blogId } });
 
-        res.status(200).json({ message: "Blog deleted successfully" });
+        res.status(200).json({ message: "Blog and associated image deleted successfully" });
     } catch (error) {
         console.error("Error deleting blog:", error);
         res.status(500).json({ message: "An error occurred while deleting the blog", error: error.message });
     }
 };
+
 
 export const GetAllBlogs = async (req, res) => {
     try {
