@@ -1,6 +1,7 @@
 import { BlogModel } from "../models/blogModel.js";
 import { UserModel } from "../models/userModel.js";
-import fs from "fs";
+import { deleteImage } from '../utilities/deleteImage.js';
+
 
 export const CreateBlog = async (req, res) => {
     try {
@@ -57,107 +58,47 @@ export const CreateBlog = async (req, res) => {
 
 export const UpdateBlog = async (req, res) => {
     try {
-        const existingBlog = await BlogModel.findById(req.params.id)
+        const existingBlog = await BlogModel.findById(req.params.id);
         if (!existingBlog) {
-            return res.status(400).json({
-                status: "Failed",
-                message: "No data found with this id"
-            })
+            return res.status(404).json({ status: "Failed", message: "No data found with this id" });
         }
-        // Create an object to hold the update fields
+
         const updateFields = {};
 
-        // Check if each field is provided and add it to the updateFields object
-        if (req.body.title) {
-            updateFields.title = req.body.title;
-        }
-        if (req.body.content) {
-            updateFields.content = req.body.content;
-        }
+        if (req.body.title) updateFields.title = req.body.title;
+        if (req.body.content) updateFields.content = req.body.content;
 
-        // Handle image removal if the removeImage flag is set
         if (req.body.removeImage === "true") {
-            // Check if the service has an existing image
-            const oldImagePath = existingService.image;
-            if (oldImagePath) {
-                // Delete the old image file
-                fs.unlink(oldImagePath, (err) => {
-                    if (err) {
-                        console.error("Failed to delete old image:", err);
-                    }
-                });
-                // Set the image field to null
-                updateFields.image = null;
-            }
+            deleteImage(existingBlog.image);
+            updateFields.image = null;
         }
 
-        // Store new image path if a new image is uploaded and removeImage is false
         if (req.file && req.body.removeImage !== "true") {
-            // Delete the old image file if it exists and if not already removed
-            const oldImagePath = existingService.image;
-            if (oldImagePath) {
-                fs.unlink(oldImagePath, (err) => {
-                    if (err) {
-                        console.error("Failed to delete old image:", err);
-                    }
-                });
-            }
-
-            // Add the new image path to the update fields
+            deleteImage(existingBlog.image);
             updateFields.image = req.file.path.replace(/\\/g, "/");
         }
 
-        // Update the service with the provided fields
-        const updatedBlog = await BlogModel.findByIdAndUpdate(
-            req.params.id,
-            updateFields,
-            { new: true }
-        );
-
+        const updatedBlog = await BlogModel.findByIdAndUpdate(req.params.id, updateFields, { new: true });
         res.status(200).json(updatedBlog);
-
     } catch (error) {
-        return res.status(400).json({
-            status: "Failed",
-            message: error.toString()
-        })
+        res.status(400).json({ status: "Failed", message: error.toString() });
     }
-}
+};
 
 
 export const DeleteBlog = async (req, res) => {
     try {
-        const blogId = req.params.id;
-
-        // Find the blog to get the image path and creator's user ID
-        const blog = await BlogModel.findById(blogId);
+        const blog = await BlogModel.findById(req.params.id);
         if (!blog) {
             return res.status(404).json({ message: "Blog not found" });
         }
 
-        const userId = blog.createdBy;
-        const imagePath = blog.image;
-
-        // Remove the image file from the server if it exists
-        if (imagePath) {
-            fs.unlink(imagePath, (err) => {
-                if (err) {
-                    console.error("Error deleting image file:", err);
-                } else {
-                    console.log("Image file deleted successfully.");
-                }
-            });
-        }
-
-        // Delete the blog
-        await BlogModel.findByIdAndDelete(blogId);
-
-        // Remove the blog ID from the user's author array
-        await UserModel.findByIdAndUpdate(userId, { $pull: { author: blogId } });
+        deleteImage(blog.image);
+        await BlogModel.findByIdAndDelete(req.params.id);
+        await UserModel.findByIdAndUpdate(blog.createdBy, { $pull: { author: req.params.id } });
 
         res.status(200).json({ message: "Blog and associated image deleted successfully" });
     } catch (error) {
-        console.error("Error deleting blog:", error);
         res.status(500).json({ message: "An error occurred while deleting the blog", error: error.message });
     }
 };

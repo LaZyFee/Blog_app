@@ -10,6 +10,7 @@ import userRoute from './routes/userRoute.js'
 import serviceRoute from './routes/serviceRoute.js'
 import blogRoute from './routes/blogRoute.js'
 import teamRoute from './routes/teamRoute.js'
+import commentRoute from './routes/commentRoute.js'
 
 configDotenv();
 
@@ -30,6 +31,7 @@ app.use('/api/v1', userRoute)
 app.use('/api/v1', serviceRoute)
 app.use('/api/v1', blogRoute)
 app.use('/api/v1', teamRoute)
+app.use('/api/v1', commentRoute)
 
 
 export default app
