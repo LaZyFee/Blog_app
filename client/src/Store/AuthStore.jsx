@@ -2,7 +2,7 @@ import { create } from "zustand";
 import axios from "axios";
 
 axios.defaults.withCredentials = true;
-
+axios.defaults.baseURL = "/api";
 export const useAuth = create((set) => ({
   user: (() => {
     const storedUser = localStorage.getItem("user");
@@ -16,13 +16,9 @@ export const useAuth = create((set) => ({
   signup: async (formData) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/register`,
-        formData
-      );
+      const response = await axios.post("/register", formData); // No need to include the full backend URL
       const { user, token } = response.data;
 
-      // Check if user and token exist
       if (user && token) {
         localStorage.setItem("user", JSON.stringify(user));
         localStorage.setItem("token", token);
@@ -44,10 +40,7 @@ export const useAuth = create((set) => ({
   login: async (email, password) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/login`,
-        { email, password }
-      );
+      const response = await axios.post("/login", { email, password });
       const { user, token } = response.data;
 
       localStorage.setItem("user", JSON.stringify(user));
