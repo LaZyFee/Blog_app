@@ -8,6 +8,7 @@ import Login from "../Pages/Authentication/Login/Login";
 import Home from "../Pages/Shared/Home/Home";
 import Service from "../Pages/Shared/Service/Service";
 import NotFound from "../Pages/Shared/NotFound/NotFound";
+import Profile from "../Pages/Shared/Profile/Profile";
 
 export const router = createBrowserRouter([
   {
@@ -19,6 +20,7 @@ export const router = createBrowserRouter([
       { path: "/blog", element: <Blog /> },
       { path: "/service", element: <Service /> },
       { path: "/contact", element: <Contact /> },
+      { path: "/profile", element: <Profile /> },
     ],
   },
   { path: "/login", element: <Login /> },

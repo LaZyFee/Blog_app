@@ -16,7 +16,7 @@ export const useAuth = create((set) => ({
   signup: async (formData) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.post("/register", formData); // No need to include the full backend URL
+      const response = await axios.post("/register", formData);
       const { user, token } = response.data;
 
       if (user && token) {
@@ -42,6 +42,7 @@ export const useAuth = create((set) => ({
     try {
       const response = await axios.post("/login", { email, password });
       const { user, token } = response.data;
+      console.log(response.data);
 
       localStorage.setItem("user", JSON.stringify(user));
       localStorage.setItem("token", token);
@@ -59,7 +60,7 @@ export const useAuth = create((set) => ({
   logout: async () => {
     set({ isLoading: true, error: null });
     try {
-      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/logout`);
+      await axios.post("/logout");
       localStorage.removeItem("user");
       localStorage.removeItem("token");
       set({
