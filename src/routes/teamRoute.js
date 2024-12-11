@@ -10,7 +10,7 @@ import {
 
 const router = express.Router();
 
-router.post("/team", AuthMiddleware, uploadTeamMemberPic.single("image"), CreateTeam);
+router.post("/create-team", AuthMiddleware, uploadTeamMemberPic.single("image"), CreateTeam);
 router.put("/team/:id", AuthMiddleware, uploadTeamMemberPic.single("image"), UpdateTeam);
 router.delete("/team/:id", AuthMiddleware, RemoveOne);
 router.get("/team", AuthMiddleware, GetAllTeamMembers);

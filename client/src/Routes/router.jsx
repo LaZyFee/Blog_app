@@ -9,6 +9,8 @@ import Home from "../Pages/Shared/Home/Home";
 import Service from "../Pages/Shared/Service/Service";
 import NotFound from "../Pages/Shared/NotFound/NotFound";
 import Profile from "../Pages/Shared/Profile/Profile";
+import ProfileLayout from "../Layouts/ProfileLayout";
+import CreateTeam from "../Pages/Shared/Profile/CreateTeam";
 
 export const router = createBrowserRouter([
   {
@@ -20,7 +22,14 @@ export const router = createBrowserRouter([
       { path: "/blog", element: <Blog /> },
       { path: "/service", element: <Service /> },
       { path: "/contact", element: <Contact /> },
-      { path: "/profile", element: <Profile /> },
+      {
+        path: "/profile",
+        element: <ProfileLayout />,
+        children: [
+          { path: "", element: <Profile /> },
+          { path: "create-team", element: <CreateTeam /> },
+        ],
+      },
     ],
   },
   { path: "/login", element: <Login /> },

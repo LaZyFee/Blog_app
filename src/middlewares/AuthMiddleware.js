@@ -1,19 +1,26 @@
 import { TokenDecode } from "../utilities/generateToken.js";
 
 export default (req, res, next) => {
-    let token = req.headers["token"];
-    if (!token) {
-        token = req.cookies["token"]
-    }
-    let decoded = TokenDecode(token);
+    console.log(req.headers);
+    const token =
+        req.headers["authorization"]?.split(" ")[1] || req.cookies["token"];
 
-    if (decoded === null) {
-        res.status(401).json({ status: "fail", message: "Unauthorized" });
-    } else {
-        let email = decoded.email;
-        let user_id = decoded.userId;
-        req.headers.email = email;
-        req.headers.user_id = user_id;
+    console.log("Authorization Header:", req.headers["authorization"]);
+    console.log("Cookie Token:", req.cookies?.token);
+
+    if (!token) {
+        return res
+            .status(401)
+            .json({ status: "fail", message: "Token not provided" });
+    }
+
+    try {
+        const decoded = TokenDecode(token);
+        console.log(decoded);
+        req.headers.email = decoded.email;
+        req.headers.user_id = decoded.userId;
         next();
+    } catch (err) {
+        res.status(401).json({ status: "fail", message: "Invalid Token" });
     }
 };

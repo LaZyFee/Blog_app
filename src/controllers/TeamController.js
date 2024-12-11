@@ -5,6 +5,7 @@ import { deleteImage } from '../utilities/deleteImage.js';
 export const CreateTeam = async (req, res) => {
     try {
         const { name, role } = req.body;
+        console.log("header", req.headers);
 
         if (!name || !role) {
             return res.status(400).json({ status: "failed", message: "Name and role are required." });
