@@ -1,12 +1,8 @@
 import { TokenDecode } from "../utilities/generateToken.js";
 
 export default (req, res, next) => {
-    console.log(req.headers);
     const token =
         req.headers["authorization"]?.split(" ")[1] || req.cookies["token"];
-
-    console.log("Authorization Header:", req.headers["authorization"]);
-    console.log("Cookie Token:", req.cookies?.token);
 
     if (!token) {
         return res
@@ -16,7 +12,6 @@ export default (req, res, next) => {
 
     try {
         const decoded = TokenDecode(token);
-        console.log(decoded);
         req.headers.email = decoded.email;
         req.headers.user_id = decoded.userId;
         next();

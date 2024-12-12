@@ -7,7 +7,6 @@ const syncCommentCounts = async () => {
             await BlogModel.findByIdAndUpdate(blog._id, { commentsCount: count });
         }
 
-        console.log("Comments count synchronized successfully!");
     } catch (error) {
         console.error("Error synchronizing comments count:", error.message);
     }

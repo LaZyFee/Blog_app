@@ -19,7 +19,12 @@ function Profile() {
             </div>
           )
         : ""}
-      <h1>Published BLogs</h1>
+      <h1 className="text-xl md:text-3xl text-center font-semibold">
+        Team Member
+      </h1>
+      <h1 className="text-xl md:text-3xl text-center font-semibold">
+        Published BLogs
+      </h1>
     </div>
   );
 }

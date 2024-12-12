@@ -5,7 +5,8 @@ import {
     CreateTeam,
     UpdateTeam,
     RemoveOne,
-    GetAllTeamMembers
+    GetAllTeamMembers,
+    GetUserProfileWithTeam
 } from "../controllers/TeamController.js";
 
 const router = express.Router();
@@ -14,4 +15,5 @@ router.post("/create-team", AuthMiddleware, uploadTeamMemberPic.single("image"),
 router.put("/team/:id", AuthMiddleware, uploadTeamMemberPic.single("image"), UpdateTeam);
 router.delete("/team/:id", AuthMiddleware, RemoveOne);
 router.get("/team", AuthMiddleware, GetAllTeamMembers);
+router.get("/profile/:userId", GetUserProfileWithTeam);
 export default router;

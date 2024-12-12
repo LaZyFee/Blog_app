@@ -42,7 +42,6 @@ export const useAuth = create((set) => ({
     try {
       const response = await axios.post("/login", { email, password });
       const { user, token } = response.data;
-      console.log(response.data);
 
       localStorage.setItem("user", JSON.stringify(user));
       localStorage.setItem("token", token);

@@ -5,7 +5,6 @@ import { deleteImage } from '../utilities/deleteImage.js';
 export const CreateTeam = async (req, res) => {
     try {
         const { name, role } = req.body;
-        console.log("header", req.headers);
 
         if (!name || !role) {
             return res.status(400).json({ status: "failed", message: "Name and role are required." });
@@ -89,5 +88,23 @@ export const GetAllTeamMembers = async (req, res) => {
         res.status(200).json({ status: "success", data: teamMembers });
     } catch (error) {
         res.status(500).json({ status: "failed", message: "Error fetching team members.", error: error.message });
+    }
+};
+export const GetUserProfileWithTeam = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        const user = await UserModel.findById(userId)
+            .populate('team')
+            .populate('author')
+            .select('-password');
+
+        if (!user) {
+            return res.status(404).json({ status: "failed", message: "User not found." });
+        }
+
+        res.status(200).json({ status: "success", data: user });
+    } catch (error) {
+        res.status(500).json({ status: "failed", message: "Error fetching user profile.", error: error.message });
     }
 };

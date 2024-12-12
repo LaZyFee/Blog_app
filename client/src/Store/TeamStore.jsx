@@ -2,10 +2,11 @@ import { create } from "zustand";
 import axios from "axios";
 axios.defaults.withCredentials = true;
 axios.defaults.baseURL = "/api";
+
 export const useTeamStore = create((set) => ({
-  teamMembers: [], // Holds the list of team members
-  error: null, // Holds error information if any request fails
-  isLoading: false, // Loading state
+  teamMembers: [],
+  error: null,
+  isLoading: false,
 
   // Fetch all team members
   fetchTeamMembers: async () => {
@@ -27,8 +28,10 @@ export const useTeamStore = create((set) => ({
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post("/create-team", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-        token,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
       });
       set((state) => ({
         teamMembers: [...state.teamMembers, response.data.data],
