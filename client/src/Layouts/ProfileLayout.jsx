@@ -4,6 +4,7 @@ import { GiTeamDowngrade } from "react-icons/gi";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from ".././Store/AuthStore";
+import { LuNotebookPen } from "react-icons/lu";
 
 function ProfileLayout() {
   const { logout } = useAuth();
@@ -30,7 +31,9 @@ function ProfileLayout() {
 
   const menuItems = [
     { name: "Profile", icon: <RiProfileFill />, path: "." },
+    { name: "Edit-Blogs", icon: <LuNotebookPen />, path: "update-blogs" },
     { name: "Create-Team", icon: <GiTeamDowngrade />, path: "create-team" },
+    { name: "Update-Team", icon: <GiTeamDowngrade />, path: "update-team" },
   ];
 
   return (

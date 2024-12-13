@@ -11,6 +11,8 @@ import NotFound from "../Pages/Shared/NotFound/NotFound";
 import Profile from "../Pages/Shared/Profile/Profile";
 import ProfileLayout from "../Layouts/ProfileLayout";
 import CreateTeam from "../Pages/Shared/Profile/CreateTeam";
+import UpdateBlog from "../Pages/Shared/Profile/UpdateBlog";
+import UpdateTeam from "../Pages/Shared/Profile/UpdateTeam";
 
 export const router = createBrowserRouter([
   {
@@ -27,7 +29,9 @@ export const router = createBrowserRouter([
         element: <ProfileLayout />,
         children: [
           { path: "", element: <Profile /> },
+          { path: "update-blogs", element: <UpdateBlog /> },
           { path: "create-team", element: <CreateTeam /> },
+          { path: "update-team", element: <UpdateTeam /> },
         ],
       },
     ],

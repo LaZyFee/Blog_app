@@ -82,4 +82,21 @@ export const useTeamStore = create((set) => ({
       });
     }
   },
+  getProfile: async (id) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axios.get(`/profile/${id}`);
+      const userData = response.data.data; // Extract user data from the response
+
+      set({
+        userProfile: userData,
+        isLoading: false,
+      });
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || "Failed to fetch user profile",
+        isLoading: false,
+      });
+    }
+  },
 }));
