@@ -10,9 +10,9 @@ import Service from "../Pages/Shared/Service/Service";
 import NotFound from "../Pages/Shared/NotFound/NotFound";
 import Profile from "../Pages/Shared/Profile/Profile";
 import ProfileLayout from "../Layouts/ProfileLayout";
-import CreateTeam from "../Pages/Shared/Profile/CreateTeam";
-import UpdateBlog from "../Pages/Shared/Profile/UpdateBlog";
-import UpdateTeam from "../Pages/Shared/Profile/UpdateTeam";
+import CreateTeam from "../Pages/Shared/Team/CreateTeam";
+import UpdateBlog from "../Pages/Shared/Blog/UpdateBlog";
+import UpdateTeam from "../Pages/Shared/Team/UpdateTeam";
 
 export const router = createBrowserRouter([
   {

@@ -83,8 +83,10 @@ export const RemoveOne = async (req, res) => {
 
 export const GetAllTeamMembers = async (req, res) => {
     try {
-        const { user_id } = req.headers;
-        const teamMembers = await TeamModel.find({ createdBy: user_id });
+        const { user_id } = req.params;
+        const teamMembers = await TeamModel.find({
+            createdBy: user_id
+        });
         res.status(200).json({ status: "success", data: teamMembers });
     } catch (error) {
         res.status(500).json({ status: "failed", message: "Error fetching team members.", error: error.message });

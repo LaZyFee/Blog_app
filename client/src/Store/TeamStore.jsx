@@ -9,13 +9,14 @@ export const useTeamStore = create((set) => ({
   isLoading: false,
 
   // Fetch all team members
-  fetchTeamMembers: async () => {
+  fetchTeamMembers: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get("/team");
-      set({ teamMembers: response.data.data, isLoading: false });
+      const response = await axios.get(`/${id}/team`);
+      set({ teamMembers: response.data.data || [], isLoading: false });
     } catch (error) {
       set({
+        teamMembers: [], // Clear members on error
         error: error.response?.data?.message || "Failed to fetch team members",
         isLoading: false,
       });

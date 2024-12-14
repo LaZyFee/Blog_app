@@ -24,7 +24,12 @@ function Profile() {
           <div className="card card-side bg-base-100 shadow-xl w-screen md:w-96 mx-auto">
             <figure>
               <img
-                src={userProfile.profileImage || "/default-profile.png"}
+                src={
+                  userProfile.profileImage ||
+                  `${import.meta.env.VITE_BACKEND_URL}/${
+                    userProfile.profileImage
+                  }`
+                }
                 className="rounded-xl"
                 alt="user profile"
               />
@@ -49,7 +54,10 @@ function Profile() {
             <div className="card bg-base-100 shadow-xl" key={member._id}>
               <figure>
                 <img
-                  src={member.profileImage || "/default-team-member.png"}
+                  src={
+                    member.profileImage ||
+                    `${import.meta.env.VITE_BACKEND_URL}/${member.profileImage}`
+                  }
                   alt={`${member.name || "Team Member"}`}
                   className="rounded-xl"
                 />
