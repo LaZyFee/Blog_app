@@ -1,10 +1,9 @@
 import { create } from "zustand";
-import axios from "axios";
-axios.defaults.withCredentials = true;
-axios.defaults.baseURL = "/api";
+import axiosInstance from "../Utils/axiosInstance";
 
 export const useTeamStore = create((set) => ({
   teamMembers: [],
+  userProfile: null,
   error: null,
   isLoading: false,
 
@@ -12,11 +11,12 @@ export const useTeamStore = create((set) => ({
   fetchTeamMembers: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get(`/${id}/team`);
+      const response = await axiosInstance.get(`/${id}/team`);
       set({ teamMembers: response.data.data || [], isLoading: false });
     } catch (error) {
+      console.error("Error fetching team members:", error);
       set({
-        teamMembers: [], // Clear members on error
+        teamMembers: [],
         error: error.response?.data?.message || "Failed to fetch team members",
         isLoading: false,
       });
@@ -27,10 +27,8 @@ export const useTeamStore = create((set) => ({
   createTeamMember: async (formData) => {
     set({ isLoading: true, error: null });
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.post("/create-team", formData, {
+      const response = await axiosInstance.post("/create-team", formData, {
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
         },
       });
@@ -39,6 +37,7 @@ export const useTeamStore = create((set) => ({
         isLoading: false,
       }));
     } catch (error) {
+      console.error("Error creating team member:", error);
       set({
         error: error.response?.data?.message || "Failed to create team member",
         isLoading: false,
@@ -50,8 +49,10 @@ export const useTeamStore = create((set) => ({
   updateTeamMember: async (id, formData) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.put(`/team/${id}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+      const response = await axiosInstance.put(`/team/${id}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
       set((state) => ({
         teamMembers: state.teamMembers.map((member) =>
@@ -60,6 +61,7 @@ export const useTeamStore = create((set) => ({
         isLoading: false,
       }));
     } catch (error) {
+      console.error("Error updating team member:", error);
       set({
         error: error.response?.data?.message || "Failed to update team member",
         isLoading: false,
@@ -71,30 +73,33 @@ export const useTeamStore = create((set) => ({
   removeTeamMember: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      await axios.delete(`/team/${id}`);
+      await axiosInstance.delete(`/team/${id}`);
       set((state) => ({
         teamMembers: state.teamMembers.filter((member) => member._id !== id),
         isLoading: false,
       }));
     } catch (error) {
+      console.error("Error removing team member:", error);
       set({
         error: error.response?.data?.message || "Failed to remove team member",
         isLoading: false,
       });
     }
   },
+
+  // Get user profile
   getProfile: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get(`/profile/${id}`);
-      const userData = response.data.data; // Extract user data from the response
-
+      const response = await axiosInstance.get(`/profile/${id}`);
       set({
-        userProfile: userData,
+        userProfile: response.data.data,
         isLoading: false,
       });
     } catch (error) {
+      console.error("Error fetching user profile:", error);
       set({
+        userProfile: null,
         error: error.response?.data?.message || "Failed to fetch user profile",
         isLoading: false,
       });
