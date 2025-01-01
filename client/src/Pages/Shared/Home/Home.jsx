@@ -1,5 +1,13 @@
+import CreatePost from "./CreatePost";
+import HomeCarousel from "./HomeCarousel";
+
 function Home() {
-  return <div>Home</div>;
+  return (
+    <>
+      <CreatePost />
+      <HomeCarousel />
+    </>
+  );
 }
 
 export default Home;
