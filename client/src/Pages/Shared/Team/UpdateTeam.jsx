@@ -63,35 +63,49 @@ function UpdateTeam() {
       ) : error ? (
         <p className="text-center text-red-500">{error}</p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-2">
           {teamMembers?.length > 0 ? (
             teamMembers.map((member) => (
-              <div className="card bg-base-100 shadow-xl" key={member._id}>
-                <figure>
+              <div
+                key={member._id}
+                className="card card-side p-2 flex items-center"
+              >
+                {/* Member Image */}
+                <figure className="flex-shrink-0">
                   <img
-                    src={`${import.meta.env.VITE_BACKEND_URL}/${member.image}`}
-                    alt={`${member.name || "Team Member"}`}
-                    className="h-48 w-full object-cover"
+                    src={
+                      member.image
+                        ? `${
+                            import.meta.env.VITE_BACKEND_URL
+                          }/${member.image.replace(/^src\//, "")}`
+                        : "/default-profile.png"
+                    }
+                    alt={member.name || "Team Member"}
+                    className="rounded-full w-36 h-36 border-4 border-indigo-300 shadow-lg"
                   />
                 </figure>
-                <div className="card-body">
-                  <h2 className="card-title">
+
+                {/* Member Info */}
+                <div className="card-body ml-6">
+                  <h2 className="card-title text-2xl font-bold text-gray-800 ">
                     {member.name || "Unnamed Member"}
                   </h2>
                   <p>{member.role || "Role not specified"}</p>
-                  <div className="flex justify-between mt-4">
+
+                  {/* Action Buttons */}
+                  <div className="flex mt-4 space-x-4">
                     <button
-                      className="btn bg-primary text-white"
+                      className="btn bg-primary text-white flex items-center gap-2"
                       onClick={() => handleEditClick(member)}
                     >
-                      <FaEdit className="text-lg" />
+                      <FaEdit className="text-lg" /> Edit
                     </button>
 
                     <button
                       onClick={() => handleDelete(member._id)}
-                      className="btn bg-red-500 text-white"
+                      className="btn bg-red-500 text-white flex items-center gap-2"
                     >
-                      <FaTrashAlt className="text-lg" />
+                      <FaTrashAlt className="text-lg" /> Delete
                     </button>
                   </div>
                 </div>

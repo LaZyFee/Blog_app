@@ -14,7 +14,7 @@ import { FaSquareGooglePlus } from "react-icons/fa6";
 import { GrContact, GrServices } from "react-icons/gr";
 import { FcAbout } from "react-icons/fc";
 import { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../../Store/AuthStore";
 
 function Navbar({ onDropdownToggle }) {
@@ -105,9 +105,12 @@ function Navbar({ onDropdownToggle }) {
         <div className="divider divider-horizontal" />
 
         <div className="navbar-center">
-          <a className="text-2xl lg:text-5xl font-extrabold text-orange-600">
+          <Link
+            to="/"
+            className="text-2xl lg:text-5xl font-extrabold text-orange-600"
+          >
             BLOG WEB
-          </a>
+          </Link>
         </div>
       </div>
 

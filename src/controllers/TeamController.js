@@ -38,27 +38,43 @@ export const CreateTeam = async (req, res) => {
 export const UpdateTeam = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, role } = req.body;
+        const { name, role, removeImage } = req.body; // Include removeImage in the destructure
 
         const teamMember = await TeamModel.findById(id);
         if (!teamMember) {
             return res.status(404).json({ status: "failed", message: "Team member not found." });
         }
 
+        // Update name and role
         if (name) teamMember.name = name;
         if (role) teamMember.role = role;
 
-        if (req.file) {
+        // Handle image removal
+        if (removeImage === "true") { // `removeImage` comes as a string from form-data
+            deleteImage(teamMember.image);
+            teamMember.image = null; // Set image to null
+        } else if (req.file) {
+            // Update with new image if provided
             deleteImage(teamMember.image);
             teamMember.image = req.file.path.replace(/\\/g, "/");
         }
 
         await teamMember.save();
-        res.status(200).json({ status: "success", message: "Team member updated successfully.", data: teamMember });
+        res.status(200).json({
+            status: "success",
+            message: "Team member updated successfully.",
+            data: teamMember,
+        });
     } catch (error) {
-        res.status(500).json({ status: "failed", message: "Error updating team member.", error: error.message });
+        console.error("Error updating team member:", error);
+        res.status(500).json({
+            status: "failed",
+            message: "Error updating team member.",
+            error: error.message,
+        });
     }
 };
+
 
 export const RemoveOne = async (req, res) => {
     try {

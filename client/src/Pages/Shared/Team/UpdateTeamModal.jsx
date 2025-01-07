@@ -6,16 +6,16 @@ import { useTeamStore } from "../../../Store/TeamStore";
 
 function UpdateTeamModal({ onClose, data }) {
   const { updateTeamMember } = useTeamStore();
-  const [removeImage, setRemoveImage] = useState(false);
 
   const [formData, setFormData] = useState({
     name: data?.name || "",
     role: data?.role || "",
     image: null, // File object for upload
   });
-  const [imagePreview, setImagePreview] = useState(
-    data?.image ? `${import.meta.env.VITE_BACKEND_URL}/${data.image}` : null
-  );
+
+  const [removeImage, setRemoveImage] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   // Handle input changes for text fields
   const handleInputChange = (e) => {
@@ -31,7 +31,11 @@ function UpdateTeamModal({ onClose, data }) {
       setImagePreview(URL.createObjectURL(file));
     }
   };
-
+  // Handle toggling image removal
+  const handleRemoveSelectedImage = () => {
+    setImagePreview(null);
+    setSelectedImage(null);
+  };
   // Remove selected image
   const handleRemoveImage = () => {
     setFormData((prev) => ({ ...prev, image: null }));
@@ -42,11 +46,13 @@ function UpdateTeamModal({ onClose, data }) {
   // Handle form submission
   const handleUpdate = async (e) => {
     e.preventDefault();
+
     const updatedData = new FormData();
     updatedData.append("name", formData.name);
     updatedData.append("role", formData.role);
+
     if (removeImage) {
-      updatedData.append("removeImage", true);
+      updatedData.append("removeImage", "true");
     } else if (formData.image) {
       updatedData.append("image", formData.image);
     }
@@ -60,6 +66,7 @@ function UpdateTeamModal({ onClose, data }) {
       showToast("Error", "Failed to update team member", "error");
     }
   };
+
   const OnClickCancel = () => {
     onClose();
   };
@@ -69,19 +76,23 @@ function UpdateTeamModal({ onClose, data }) {
       <div className="modal-box">
         <form onSubmit={handleUpdate}>
           <div className="bg-white p-5 lg:p-10 rounded-lg min-h-72">
+            {/* Text Inputs */}
             <div className="flex flex-col gap-4">
               <label className="text-gray-700 font-semibold">
                 Current Image
               </label>
-              <img
-                src={
-                  data.image && !removeImage
-                    ? `${import.meta.env.VITE_BACKEND_URL}/${data.image}`
-                    : ""
-                }
-                className="w-40 h-32 object-cover object-center"
-                alt={data.name}
-              />
+              {data.image && !removeImage ? (
+                <img
+                  src={`${
+                    import.meta.env.VITE_BACKEND_URL
+                  }/${data.image.replace(/^src\//, "")}`}
+                  className="w-full h-60 object-cover rounded-lg"
+                  alt={data.name || "Current Image"}
+                />
+              ) : (
+                <p className="text-gray-500 italic">No image selected.</p>
+              )}
+
               <label htmlFor="name" className="text-gray-700 font-semibold">
                 Name
               </label>
@@ -89,7 +100,6 @@ function UpdateTeamModal({ onClose, data }) {
                 id="name"
                 type="text"
                 name="name"
-                placeholder={data.name}
                 value={formData.name}
                 onChange={handleInputChange}
                 className="input input-bordered w-full bg-white text-black"
@@ -104,17 +114,17 @@ function UpdateTeamModal({ onClose, data }) {
                 type="text"
                 name="role"
                 value={formData.role}
-                placeholder={data.role}
                 onChange={handleInputChange}
                 className="input input-bordered w-full bg-white text-black"
                 required
               />
             </div>
 
-            <div className="flex flex-col gap-4">
+            {/* Image Upload and Preview */}
+            <div className="flex flex-col gap-4 mt-5">
               <label className="text-gray-700 font-semibold">Image</label>
-              {imagePreview && (
-                <div className="relative mt-2">
+              {imagePreview ? (
+                <div className="relative">
                   <img
                     src={imagePreview}
                     alt="Selected"
@@ -123,11 +133,15 @@ function UpdateTeamModal({ onClose, data }) {
                   <button
                     type="button"
                     className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600"
-                    onClick={handleRemoveImage}
+                    onClick={handleRemoveSelectedImage}
                   >
                     <IoTrashOutline className="text-xl" />
                   </button>
                 </div>
+              ) : (
+                <p className="text-gray-500 italic">
+                  Upload new image to preview.
+                </p>
               )}
 
               <label
@@ -141,7 +155,6 @@ function UpdateTeamModal({ onClose, data }) {
                 id="image"
                 className="hidden"
                 onChange={handleFileChange}
-                disabled={removeImage}
               />
 
               <label className="flex items-center space-x-2">
@@ -151,24 +164,26 @@ function UpdateTeamModal({ onClose, data }) {
                   onChange={handleRemoveImage}
                 />
                 <span className="text-gray-700 font-semibold">
-                  Remove Existing Image
+                  Remove Image
                 </span>
               </label>
+            </div>
 
-              <div className="flex justify-between mt-5">
-                <button
-                  className="btn bg-red-500 px-8 py-2 text-white"
-                  onClick={OnClickCancel}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="btn bg-primary px-8 py-2 text-white"
-                >
-                  Submit
-                </button>
-              </div>
+            {/* Form Actions */}
+            <div className="flex justify-between mt-5">
+              <button
+                type="button"
+                className="btn bg-red-500 px-8 py-2 text-white"
+                onClick={OnClickCancel}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="btn bg-primary px-8 py-2 text-white"
+              >
+                Submit
+              </button>
             </div>
           </div>
         </form>

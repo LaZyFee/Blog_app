@@ -1,15 +1,10 @@
 import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
-
 // Storage engine for profile pictures
 const profilePicStorage = multer.diskStorage({
     destination: function (req, file, cb) {
-        const dir = "src/uploads/profile-pics/";
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir, { recursive: true }); // Create the directory if it doesn't exist
-        }
-        cb(null, dir);
+        cb(null, "src/uploads/profile-pics/");
     },
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);

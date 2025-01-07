@@ -21,8 +21,9 @@ export const Register = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Upload profile picture
-        // const profilePicPath = req.file ? req.file.path.replace(/\\/g, "/") : "";
-        const profilePicPath = req.file ? `uploads/profile-pics/${req.file.filename}` : "";
+        const profilePicPath = req.file ? req.file.path.replace(/\\/g, "/") : "";
+
+        // const profilePicPath = req.file ? `uploads/profile-pics/${req.file.filename}` : "";
 
 
         const user = await UserModel.create({
