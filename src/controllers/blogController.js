@@ -106,15 +106,19 @@ export const DeleteBlog = async (req, res) => {
 
 export const GetAllBlogs = async (req, res) => {
     try {
-        const Blogs = await BlogModel.find();
+        const Blogs = await BlogModel.find().populate({
+            path: "createdBy",
+            select: "_id name profilepic"
+        });
+
         return res.status(200).json({
             status: "success",
             Blogs
-        })
+        });
     } catch (error) {
         return res.status(400).json({
             status: "Failed",
             message: error.toString()
-        })
+        });
     }
-}
+};

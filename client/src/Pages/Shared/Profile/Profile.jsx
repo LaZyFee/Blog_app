@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useAuth } from "../../../Store/AuthStore";
 import { useTeamStore } from "../../../Store/TeamStore";
+import { Link } from "react-router-dom";
 
 function Profile() {
   const { user } = useAuth();
@@ -12,6 +13,7 @@ function Profile() {
       getProfile(user._id);
     }
   }, [user, getProfile]);
+  console.log(userProfile);
 
   return (
     <div className="w-full">
@@ -38,7 +40,7 @@ function Profile() {
               <h2 className="card-title text-2xl font-bold text-gray-800">
                 {userProfile.name || "Unknown User"}
               </h2>
-              <p className="text-lg text-gray-600 mt-2">
+              <p className="text-lg  -100 mt-2">
                 {userProfile.email || "No email available"}
               </p>
             </div>
@@ -91,16 +93,48 @@ function Profile() {
         Published Blogs
       </h1>
       {userProfile?.author?.length > 0 ? (
-        <ul className="mt-6 space-y-4">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 mt-8">
           {userProfile.author.map((blog) => (
-            <li
+            <div
               key={blog._id}
-              className="bg-white shadow-md hover:shadow-lg transition-shadow rounded-lg p-4 text-center text-lg font-medium text-gray-700"
+              className="card bg-white shadow-md hover:shadow-lg transition-shadow duration-300 rounded-lg overflow-hidden"
             >
-              {blog.title || "Untitled Blog"}
-            </li>
+              <figure className="relative h-40 w-full overflow-hidden">
+                <img
+                  src={
+                    blog.image
+                      ? `${
+                          import.meta.env.VITE_BACKEND_URL
+                        }/${blog.image.replace(/^src\//, "")}`
+                      : "/default-profile.png"
+                  }
+                  alt={blog.title}
+                  className="h-full w-full object-cover transition-transform duration-500 hover:scale-110"
+                />
+              </figure>
+              <div className="card-body p-4">
+                <h2 className="card-title text-xl font-semibold text-gray-800 mb-2">
+                  {blog.title}
+                </h2>
+                <p className="text-gray-600 text-sm mb-4">
+                  {blog.content.length > 200 ? (
+                    <>
+                      {blog.content.slice(0, 200)}{" "}
+                      <Link
+                        to={`/blog/${blog._id}`}
+                        className="text-indigo-500 hover:text-indigo-700 text-sm font-medium"
+                      >
+                        ... Read More →
+                      </Link>
+                    </>
+                  ) : (
+                    blog.content
+                  )}
+                </p>
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
       ) : (
         <p className="text-center text-gray-500 mt-4">
           No blogs published yet.

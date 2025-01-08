@@ -6,6 +6,7 @@ import { useAuth } from "../../../Store/AuthStore";
 import PasswordStrengthMeter from "../PasswordStrenthMeter/PasswordStrenthMeter";
 import Swal from "sweetalert2";
 import { IoCloudUploadOutline } from "react-icons/io5";
+import showToast from "../../../Utils/ShowToast";
 
 function Signup() {
   const {
@@ -29,26 +30,12 @@ function Signup() {
 
     try {
       await signup(formData);
-      Swal.fire({
-        title: "Success!",
-        text: "Account created successfully!",
-        icon: "success",
-        toast: true,
-        position: "top",
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-      });
+      showToast("Success!", "Account created successfully!", "success");
       navigate("/");
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Error signing up";
       setSignUPError(errorMessage);
-      Swal.fire({
-        title: "Error",
-        text: errorMessage,
-        icon: "error",
-        confirmButtonText: "OK",
-      });
+      showToast("Error", "errorMessage", "error");
     }
   };
 

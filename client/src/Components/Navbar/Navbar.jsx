@@ -42,7 +42,7 @@ function Navbar({ onDropdownToggle }) {
       : [{ name: "Login", icon: <FaUser />, path: "/login" }]),
   ];
   return (
-    <div className="navbar bg-base-100 text-base-content shadow-md">
+    <div className="navbar bg-base-100  -content shadow-md">
       <div className="flex justify-between">
         <div className="navbar-start">
           <div className="dropdown">

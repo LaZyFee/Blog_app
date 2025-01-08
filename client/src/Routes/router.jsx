@@ -13,6 +13,8 @@ import ProfileLayout from "../Layouts/ProfileLayout";
 import CreateTeam from "../Pages/Shared/Team/CreateTeam";
 import UpdateBlog from "../Pages/Shared/Blog/UpdateBlog";
 import UpdateTeam from "../Pages/Shared/Team/UpdateTeam";
+import User from "../Pages/Shared/User/User";
+import DetailsBlog from "../Pages/Shared/Blog/DetailsBlog";
 
 export const router = createBrowserRouter([
   {
@@ -24,6 +26,9 @@ export const router = createBrowserRouter([
       { path: "/blog", element: <Blog /> },
       { path: "/service", element: <Service /> },
       { path: "/contact", element: <Contact /> },
+      { path: "/user", element: <User /> },
+      { path: "/blog/:id", element: <DetailsBlog /> },
+
       {
         path: "/profile",
         element: <ProfileLayout />,

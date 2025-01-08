@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../Store/AuthStore";
-import Swal from "sweetalert2";
+import showToast from "../../../Utils/ShowToast";
 
 function Login() {
   const {
@@ -19,28 +19,17 @@ function Login() {
 
     try {
       await login(email, password);
-      Swal.fire({
-        title: "Success",
-        text: "Login successful",
-        icon: "success",
-        toast: true,
-        position: "top",
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-      });
-
+      showToast("Success", "Login successful", "success");
       navigate("/");
     } catch (error) {
       // Check for specific error status
       if (error.response && error.response.status === 401) {
         setLoginError("Invalid email or password, please try again");
-        Swal.fire({
-          title: "Error",
-          text: "Invalid email or password, please try again",
-          icon: "error",
-          confirmButtonText: "Try Again",
-        });
+        showToast(
+          "Error",
+          "Invalid email or password, please try again",
+          "error"
+        );
       } else {
         setLoginError(error.message || "Error logging in");
       }

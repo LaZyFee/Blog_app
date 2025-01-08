@@ -1,7 +1,7 @@
 const Banner = () => {
   return (
-    <div className="py-10 px-6 md:px-12 text-center bg bg-gradient-to-r from-amber-400 via-orange-200 to-orange-500 text-black rounded-xl">
-      <h1 className="text-3xl md:text-5xl font-extrabold leading-tight mb-4">
+    <div className="py-10 px-6 md:px-12 text-center">
+      <h1 className="text-3xl md:text-5xl font-extrabold leading-tight mb-4 text-orange-500">
         Welcome to the World of Ideas and Insights, Ignite Your Curiosity,
         Transform Your World
       </h1>

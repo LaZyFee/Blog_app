@@ -55,7 +55,7 @@ function ProfileLayout() {
           aria-label="close sidebar"
           className="drawer-overlay"
         ></label>
-        <ul className="menu mt-16 md:mt-0 gap-12 bg-base-200 text-base-content min-h-full w-64  text-xl">
+        <ul className="menu mt-16 md:mt-0 gap-12 bg-base-200  -content min-h-full w-64  text-xl">
           {/* Sidebar content here */}
           {menuItems.map((item) => (
             <li key={item.name}>

@@ -69,7 +69,7 @@ function CreateTeam() {
       <form onSubmit={handleSubmit(onSubmit)} className="my-4 w-full">
         <div className="flex flex-col lg:flex-row gap-5 bg-base-200 p-5 rounded-lg min-h-72 mx-5 md:mx-10">
           <div className="w-full  flex flex-col gap-4">
-            <label htmlFor="name" className="text-base-content font-semibold">
+            <label htmlFor="name" className=" -content font-semibold">
               Team Member Name
             </label>
             <input
@@ -85,7 +85,7 @@ function CreateTeam() {
               <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
             )}
 
-            <label htmlFor="role" className="text-base-content font-semibold">
+            <label htmlFor="role" className=" -content font-semibold">
               Member Role
             </label>
             <input
@@ -101,9 +101,7 @@ function CreateTeam() {
               <p className="text-red-500 text-sm mt-1">{errors.role.message}</p>
             )}
 
-            <label className="text-base-content font-semibold">
-              Team Member Image
-            </label>
+            <label className=" -content font-semibold">Team Member Image</label>
 
             <label
               htmlFor="image"
