@@ -19,6 +19,18 @@ const useBlogStore = create((set) => ({
       });
     }
   },
+  fetchBlogById: async (id) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await axios.get(`/blog/${id}`);
+      set({ blog: response.data.blog, loading: false });
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || "Failed to fetch blogs",
+        loading: false,
+      });
+    }
+  },
 
   // Create a new blog
   createBlog: async (blogData) => {

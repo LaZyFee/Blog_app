@@ -5,6 +5,7 @@ import { FaRegComment } from "react-icons/fa6";
 import Skeleton from "../../../Components/Skeleton";
 import { IoMdTime } from "react-icons/io";
 import { Link } from "react-router-dom";
+import { formatDate } from "../../../Utils/formatedate";
 
 function Blog() {
   const { blogs, fetchBlogs, loading, error } = useBlogStore();
@@ -14,7 +15,7 @@ function Blog() {
   }, [fetchBlogs]);
 
   // Truncate long descriptions
-  const truncateDescription = (description, maxLength = 300) => {
+  const truncateDescription = (description, maxLength = 500) => {
     if (description.length > maxLength) {
       return (
         <>
@@ -24,21 +25,6 @@ function Blog() {
       );
     }
     return description;
-  };
-
-  // Format date for display
-  const formatDate = (date) => {
-    const options = { day: "2-digit", month: "short", year: "numeric" };
-    const parts = new Intl.DateTimeFormat("en-US", options).formatToParts(
-      new Date(date)
-    );
-
-    // Extract day, month, and year
-    const day = parts.find((part) => part.type === "day").value;
-    const month = parts.find((part) => part.type === "month").value;
-    const year = parts.find((part) => part.type === "year").value;
-
-    return `${day} ${month}, ${year}`;
   };
 
   if (loading) return <Skeleton />;
@@ -52,6 +38,7 @@ function Blog() {
           <div
             key={blog._id}
             className="p-4 transition-all duration-500 hover:shadow-xl"
+            data-aos="fade-up"
           >
             <div className="overflow-hidden">
               <img
@@ -94,14 +81,22 @@ function Blog() {
                 </p>
               </Link>
             </div>
-            <Link to={`/blog/${blog._id}`}>
-              {" "}
-              <div className="space-y-3 py-3">
+            <Link to={"/blog-data"} state={{ blogId: blog._id }}>
+              <div className="space-y-3 py-3 min-h-[200px] ">
                 <h2 className="text-lg font-bold text-orange-700 mb-2">
                   {blog.title}
                 </h2>
-                <p className="">{truncateDescription(blog.content)}</p>
-              </div>{" "}
+                <p
+                  className="text-sm"
+                  style={{
+                    whiteSpace: "pre-wrap",
+                    overflowWrap: "break-word",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {truncateDescription(blog.content)}
+                </p>
+              </div>
             </Link>
             <div className="divider"></div>
             <div className="flex justify-between items-center mt-4">
@@ -109,10 +104,9 @@ function Blog() {
                 <SlLike className="text-orange-600 text-xl hover:scale-110 cursor-pointer transition duration-200" />
                 <SlDislike className="text-orange-600 text-xl hover:scale-110 cursor-pointer transition duration-200" />
               </div>
-              <Link to={`/blog/${blog._id}`}>
-                {" "}
+              <Link to={"/blog-data"} state={{ blogId: blog._id }}>
                 <div className="flex items-center gap-1">
-                  <FaRegComment className="text-orange-600 text-xl" />{" "}
+                  <FaRegComment className="text-orange-600 text-xl" />
                   <span className="text-sm text-gray-600">
                     ({blog.commentsCount || 0})
                   </span>

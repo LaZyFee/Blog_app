@@ -121,7 +121,8 @@ function Profile() {
                     <>
                       {blog.content.slice(0, 200)}{" "}
                       <Link
-                        to={`/blog/${blog._id}`}
+                        to={"/blog-data"}
+                        state={{ blogId: blog._id }}
                         className="text-indigo-500 hover:text-indigo-700 text-sm font-medium"
                       >
                         ... Read More →

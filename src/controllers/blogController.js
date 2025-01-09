@@ -122,3 +122,30 @@ export const GetAllBlogs = async (req, res) => {
         });
     }
 };
+
+export const GetBlogsById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const blog = await BlogModel.findById(id).populate({
+            path: "createdBy",
+            select: "_id name profilepic",
+        });
+
+        if (!blog) {
+            return res.status(404).json({
+                status: "Failed",
+                message: "Blog not found",
+            });
+        }
+
+        return res.status(200).json({
+            status: "success",
+            blog, // Return the blog object
+        });
+    } catch (error) {
+        return res.status(400).json({
+            status: "Failed",
+            message: error.toString(),
+        });
+    }
+};
