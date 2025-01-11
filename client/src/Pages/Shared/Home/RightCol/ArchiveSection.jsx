@@ -4,10 +4,10 @@ function ArchiveSection() {
       <h2 className="text-lg font-semibold   mb-4">ARCHIVE</h2>
       <ul className="text-gray-700 space-y-2">
         <li>
-          <strong className="hover:text-orange-500">2023</strong>
+          <strong className="hover:text-primary">2023</strong>
         </li>
         <li>
-          <strong className="hover:text-orange-500">2024</strong>
+          <strong className="hover:text-primary">2024</strong>
         </li>
       </ul>
     </div>

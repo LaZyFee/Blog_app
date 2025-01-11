@@ -5,12 +5,25 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        primary: '#F97316',
+      },
+    },
   },
   plugins: [
     require('daisyui'),
+    function ({ addUtilities }) {
+      addUtilities({
+        '.text-pre-wrap': {
+          whiteSpace: 'pre-wrap',
+          overflowWrap: 'break-word',
+          wordBreak: 'break-word',
+        },
+      });
+    },
   ],
   daisyui: {
-    themes: ["nord", "night"]
-  }
-}
+    themes: ["nord", "night"],
+  },
+};

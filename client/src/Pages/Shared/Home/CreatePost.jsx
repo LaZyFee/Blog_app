@@ -29,7 +29,7 @@ function CreatePost() {
           className="btn rounded-2xl w-full h-full text-xl"
           aria-label="Share your thoughts"
         >
-          Hello, <span className="text-orange-600 text-xl">{user.name} </span>
+          Hello, <span className="text-primary text-xl">{user.name} </span>
           What&apos;s on your mind? Share your thoughts
         </button>
       </div>

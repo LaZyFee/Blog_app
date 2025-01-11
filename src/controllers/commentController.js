@@ -7,6 +7,7 @@ export const createComment = async (req, res) => {
         const { user_id } = req.headers;
         const { blog_id } = req.params;
         const { comment } = req.body;
+        console.log(req.body);
 
         if (!comment) {
             return res.status(400).json({ status: "failed", message: "Comment content is required." });
@@ -16,14 +17,19 @@ export const createComment = async (req, res) => {
         if (!user) {
             return res.status(404).json({ status: "failed", message: "User not found." });
         }
-
+        console.log(user);
         const newComment = await CommentModel.create({
             comment,
             createdBy: user_id,
             parent: blog_id,
         });
+        console.log(newComment);
 
-        await BlogModel.findByIdAndUpdate(blog_id, { $inc: { commentsCount: 1 } });
+        // Add comment ID to the blog's comments array
+        await BlogModel.findByIdAndUpdate(blog_id, {
+            $push: { comments: newComment._id },
+            $inc: { commentsCount: 1 },
+        });
 
         const populatedComment = await CommentModel.findById(newComment._id)
             .populate("createdBy", "name profilepic");
@@ -37,6 +43,7 @@ export const createComment = async (req, res) => {
         res.status(500).json({ status: "failed", message: "Error creating comment.", error: error.message });
     }
 };
+
 
 // Update an existing comment
 export const updateComment = async (req, res) => {
@@ -118,28 +125,32 @@ export const deleteComment = async (req, res) => {
 export const getAllComments = async (req, res) => {
     try {
         const { blog_id } = req.params;
-        const { page = 1, limit = 10 } = req.query;
 
-        const comments = await CommentModel.find({ parent: blog_id, deleted: false })
+        // Fetch comments with their replies and respective user details
+        const comments = await CommentModel.find({ parent: blog_id, type: "comment", deleted: false })
             .populate("createdBy", "name profilepic")
             .populate({
                 path: "replies",
+                match: { deleted: false }, // Ensure replies are active
                 populate: { path: "createdBy", select: "name profilepic" },
             })
-            .sort({ createdAt: -1 })
-            .skip((page - 1) * limit)
-            .limit(parseInt(limit));
+            .sort({ createdAt: -1 });
 
+
+        // Count total comments for pagination
         const totalComments = await CommentModel.countDocuments({ parent: blog_id, deleted: false });
 
         res.status(200).json({
             status: "success",
             data: comments,
             total: totalComments,
-            page: parseInt(page),
-            totalPages: Math.ceil(totalComments / limit),
         });
     } catch (error) {
-        res.status(500).json({ status: "failed", message: "Error fetching comments.", error: error.message });
+        res.status(500).json({
+            status: "failed",
+            message: "Error fetching comments.",
+            error: error.message,
+        });
     }
 };
+

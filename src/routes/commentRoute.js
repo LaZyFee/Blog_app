@@ -32,7 +32,7 @@ router.patch("/:id/like-unlike", AuthMiddleware, toggleLike);
 
 
 //get all comments
-router.get("/:blog_id/comments", getAllComments);
+router.get("/:blog_id", getAllComments);
 
 
 export default router;

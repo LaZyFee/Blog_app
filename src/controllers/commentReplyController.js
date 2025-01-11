@@ -1,6 +1,5 @@
 import { CommentModel } from "../models/commentModel.js";
 import { UserModel } from "../models/userModel.js";
-import { BlogModel } from "../models/blogModel.js";
 
 // Add a reply to a comment
 export const addReply = async (req, res) => {
@@ -13,24 +12,31 @@ export const addReply = async (req, res) => {
             return res.status(400).json({ status: "failed", message: "Reply content is required." });
         }
 
+        // Check parent comment existence
         const parentComment = await CommentModel.findById(comment_id);
         if (!parentComment) {
             return res.status(404).json({ status: "failed", message: "Parent comment not found." });
         }
 
+        // Check user existence
         const user = await UserModel.findById(user_id, "name profilepic");
         if (!user) {
             return res.status(404).json({ status: "failed", message: "User not found." });
         }
 
+        // Create new reply
         const newReply = await CommentModel.create({
             comment,
             createdBy: user_id,
             parent: blog_id,
+            type: "reply",
         });
 
-        await CommentModel.findByIdAndUpdate(comment_id, { $push: { replies: newReply._id } });
+        // Add reply to parent comment
+        parentComment.replies.push(newReply._id);
+        await parentComment.save();
 
+        // Populate the reply
         const populatedReply = await CommentModel.findById(newReply._id)
             .populate("createdBy", "name profilepic");
 
@@ -40,9 +46,13 @@ export const addReply = async (req, res) => {
             data: populatedReply,
         });
     } catch (error) {
-        res.status(500).json({ status: "failed", message: "Error adding reply.", error: error.message });
+        const errorMessage = error.name === "ValidationError"
+            ? "Invalid input data."
+            : "An unexpected error occurred.";
+        res.status(500).json({ status: "failed", message: errorMessage, error: error.message });
     }
 };
+
 // Update an existing reply
 export const updateReply = async (req, res) => {
     try {
@@ -122,14 +132,12 @@ export const deleteReply = async (req, res) => {
 export const getReplies = async (req, res) => {
     try {
         const { comment_id } = req.params;
-        const { page = 1, limit = 10 } = req.query;
 
         // Find the comment and its replies
-        const replies = await CommentModel.find({ parent: comment_id, deleted: false })
+        const replies = await CommentModel.find({ parent: comment_id, type: "reply", deleted: false })
             .populate("createdBy", "name profilepic")
-            .sort({ createdAt: -1 })
-            .skip((page - 1) * limit)
-            .limit(parseInt(limit));
+            .sort({ createdAt: -1 });
+
 
         // Count total replies for pagination
         const totalReplies = await CommentModel.countDocuments({ parent: comment_id, deleted: false });
@@ -138,8 +146,6 @@ export const getReplies = async (req, res) => {
             status: "success",
             data: replies,
             total: totalReplies,
-            page: parseInt(page),
-            totalPages: Math.ceil(totalReplies / limit),
         });
     } catch (error) {
         res.status(500).json({

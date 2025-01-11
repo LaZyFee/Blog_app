@@ -2,13 +2,14 @@
 import { FiMenu } from "react-icons/fi";
 import {
   FaFacebookSquare,
-  FaTwitterSquare,
   FaYoutubeSquare,
   FaSearch,
   FaHome,
   FaUserEdit,
   FaUser,
   FaBlog,
+  FaGithub,
+  FaLinkedin,
 } from "react-icons/fa";
 import { FaSquareGooglePlus } from "react-icons/fa6";
 import { GrContact, GrServices } from "react-icons/gr";
@@ -42,7 +43,7 @@ function Navbar({ onDropdownToggle }) {
       : [{ name: "Login", icon: <FaUser />, path: "/login" }]),
   ];
   return (
-    <div className="navbar bg-base-100  -content shadow-md">
+    <div className="navbar bg-base-100 text-base-100-content shadow-md">
       <div className="flex justify-between">
         <div className="navbar-start">
           <div className="dropdown">
@@ -63,7 +64,11 @@ function Navbar({ onDropdownToggle }) {
             </div>
             {dropdownOpen && (
               <div
-                className="dropdown-content w-screen container mx-auto"
+                className={`dropdown-content ${
+                  dropdownOpen
+                    ? "absolute top-full left-0 w-screen z-50 bg-base-100 lg:relative lg:mx-auto"
+                    : ""
+                } container mx-auto bg-base-100`}
                 onClick={() => {
                   setDropdownOpen(false);
                   onDropdownToggle(false);
@@ -73,11 +78,25 @@ function Navbar({ onDropdownToggle }) {
                   tabIndex={1}
                   className="mt-7 p-2 shadow bg-base-100 flex flex-col lg:flex-row justify-between border-t-2 border-orange-500 me-5"
                 >
-                  <div className="flex lg:hidden items-center my-2 container mx-auto justify-evenly  ">
-                    <FaFacebookSquare className="text-xl text-slate-500 hover:text-orange-500" />
-                    <FaSquareGooglePlus className="text-xl text-slate-500 hover:text-orange-500" />
-                    <FaTwitterSquare className="text-xl text-slate-500 hover:text-orange-500" />
-                    <FaYoutubeSquare className="text-xl text-slate-500 hover:text-orange-500" />
+                  <div className="flex lg:hidden items-center my-2 container mx-auto justify-evenly">
+                    <Link to="https://www.facebook.com/rabiulhasan.rafee">
+                      <FaFacebookSquare className="text-2xl text-slate-500 hover:text-primary" />
+                    </Link>
+                    <Link
+                      to={"https://www.linkedin.com/in/rabiul-rafee-361224183/"}
+                    >
+                      <FaLinkedin className="text-2xl text-slate-500 hover:text-primary" />
+                    </Link>
+
+                    <Link to="https://github.com/LaZyFee">
+                      <FaGithub className="text-2xl text-slate-500 hover:text-primary" />
+                    </Link>
+                    <Link to="https://www.youtube.com/@lazyfee4473">
+                      <FaYoutubeSquare className="text-2xl text-slate-500 hover:text-primary" />
+                    </Link>
+                    <a href="mailto:rhr277@gmail.com">
+                      <FaSquareGooglePlus className="text-2xl text-slate-500 hover:text-primary" />
+                    </a>
                   </div>
                   {menuItems.map((item) => (
                     <NavLink
@@ -86,10 +105,9 @@ function Navbar({ onDropdownToggle }) {
                       className={({ isActive }) =>
                         isActive
                           ? "bg-red-500 text-white font-semibold py-2 px-4"
-                          : "hover:text-orange-500 hover:bg-base-300  py-2 px-4"
+                          : "hover:text-primary hover:bg-base-300 py-2 px-4"
                       }
                       end={item.path === "."}
-                      route
                     >
                       <span className="inline-flex items-center">
                         {item.icon}
@@ -117,10 +135,22 @@ function Navbar({ onDropdownToggle }) {
       <div className="navbar-end flex items-center gap-4 lg:ml-32">
         {/* Social Icons */}
         <div className="hidden lg:flex items-center gap-3">
-          <FaFacebookSquare className="text-2xl text-slate-500 hover:text-orange-500" />
-          <FaSquareGooglePlus className="text-2xl text-slate-500 hover:text-orange-500" />
-          <FaTwitterSquare className="text-2xl text-slate-500 hover:text-orange-500" />
-          <FaYoutubeSquare className="text-2xl text-slate-500 hover:text-orange-500" />
+          <Link to="https://www.facebook.com/rabiulhasan.rafee">
+            <FaFacebookSquare className="text-2xl text-slate-500 hover:text-primary" />
+          </Link>
+          <Link to={"https://www.linkedin.com/in/rabiul-rafee-361224183/"}>
+            <FaLinkedin className="text-2xl text-slate-500 hover:text-primary" />
+          </Link>
+
+          <Link to="https://github.com/LaZyFee">
+            <FaGithub className="text-2xl text-slate-500 hover:text-primary" />
+          </Link>
+          <Link to="https://www.youtube.com/@lazyfee4473">
+            <FaYoutubeSquare className="text-2xl text-slate-500 hover:text-primary" />
+          </Link>
+          <a href="mailto:rhr277@gmail.com">
+            <FaSquareGooglePlus className="text-2xl text-slate-500 hover:text-primary" />
+          </a>
         </div>
 
         {/* Theme Toggle */}
@@ -165,7 +195,7 @@ function Navbar({ onDropdownToggle }) {
         {/* Search Button */}
         <button className="btn btn-ghost flex items-center gap-2">
           <span className="text-sm hidden md:block">SEARCH</span>
-          <FaSearch className="text-lg text-orange-500" />
+          <FaSearch className="text-lg text-primary" />
         </button>
       </div>
     </div>

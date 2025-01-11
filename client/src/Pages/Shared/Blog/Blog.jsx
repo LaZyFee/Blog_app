@@ -20,7 +20,7 @@ function Blog() {
       return (
         <>
           {description.slice(0, maxLength)}
-          <span className="text-orange-500 font-semibold">... read more</span>
+          <span className="text-primary font-semibold">... read more</span>
         </>
       );
     }
@@ -83,17 +83,10 @@ function Blog() {
             </div>
             <Link to={"/blog-data"} state={{ blogId: blog._id }}>
               <div className="space-y-3 py-3 min-h-[200px] ">
-                <h2 className="text-lg font-bold text-orange-700 mb-2">
+                <h2 className="text-lg font-bold text-primary mb-2">
                   {blog.title}
                 </h2>
-                <p
-                  className="text-sm"
-                  style={{
-                    whiteSpace: "pre-wrap",
-                    overflowWrap: "break-word",
-                    wordBreak: "break-word",
-                  }}
-                >
+                <p className="text-sm text-pre-wrap">
                   {truncateDescription(blog.content)}
                 </p>
               </div>
@@ -101,12 +94,12 @@ function Blog() {
             <div className="divider"></div>
             <div className="flex justify-between items-center mt-4">
               <div className="flex gap-3">
-                <SlLike className="text-orange-600 text-xl hover:scale-110 cursor-pointer transition duration-200" />
-                <SlDislike className="text-orange-600 text-xl hover:scale-110 cursor-pointer transition duration-200" />
+                <SlLike className="text-primary text-xl hover:scale-110 cursor-pointer transition duration-200" />
+                <SlDislike className="text-primary text-xl hover:scale-110 cursor-pointer transition duration-200" />
               </div>
               <Link to={"/blog-data"} state={{ blogId: blog._id }}>
                 <div className="flex items-center gap-1">
-                  <FaRegComment className="text-orange-600 text-xl" />
+                  <FaRegComment className="text-primary text-xl" />
                   <span className="text-sm text-gray-600">
                     ({blog.commentsCount || 0})
                   </span>
@@ -131,12 +124,12 @@ export default Blog;
             </figure>
             <div className="card-body">
               <div className="flex flex-col mb-3 text-sm text-gray-500">
-                <p className="font-semibold text-orange-600">
+                <p className="font-semibold text-primary">
                   {blog.createdBy}
                 </p>
                 <p>{formatDate(blog.createdAt)}</p>
               </div>
-              <h2 className="text-lg font-bold text-orange-700 mb-2">
+              <h2 className="text-lg font-bold text-primary mb-2">
                 {blog.title}
               </h2>
               <p
@@ -152,11 +145,11 @@ export default Blog;
               <div className="divider"></div>
               <div className="flex justify-between items-center mt-4">
                 <div className="flex gap-3">
-                  <SlLike className="text-orange-600 text-xl hover:scale-110 cursor-pointer transition duration-200" />
-                  <SlDislike className="text-orange-600 text-xl hover:scale-110 cursor-pointer transition duration-200" />
+                  <SlLike className="text-primary text-xl hover:scale-110 cursor-pointer transition duration-200" />
+                  <SlDislike className="text-primary text-xl hover:scale-110 cursor-pointer transition duration-200" />
                 </div>
                 <div className="flex items-center gap-1">
-                  <FaRegComment className="text-orange-600 text-xl" />
+                  <FaRegComment className="text-primary text-xl" />
                   <span className="text-sm text-gray-600">
                     ({blog.commentsCount || 0})
                   </span>

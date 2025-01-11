@@ -62,7 +62,7 @@ function ProfileLayout() {
               <NavLink
                 to={item.path}
                 className={({ isActive }) =>
-                  isActive ? "text-orange-500 font-semibold text-2xl" : ""
+                  isActive ? "text-primary font-semibold text-2xl" : ""
                 }
                 end={item.path === "."}
               >

@@ -76,7 +76,7 @@ function Profile() {
 
               {/* Member Info */}
               <div className="card-body ml-6">
-                <h2 className="card-title text-2xl font-bold text-orange-600">
+                <h2 className="card-title text-2xl font-bold text-primary">
                   {member.name || "Unnamed Member"}
                 </h2>
                 <p>{member.role || "Role not specified"}</p>

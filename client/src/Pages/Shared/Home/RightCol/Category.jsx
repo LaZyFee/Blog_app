@@ -17,9 +17,9 @@ const Category = () => {
         {categories.map((category, index) => (
           <li
             key={index}
-            className="flex items-center hover:text-orange-500 transition duration-200"
+            className="flex items-center hover:text-primary transition duration-200"
           >
-            <FaRss className="text-orange-500 mr-3" />
+            <FaRss className="text-primary mr-3" />
             <span className="flex-1">{category.name}</span>
             <span className="">({category.count})</span>
           </li>

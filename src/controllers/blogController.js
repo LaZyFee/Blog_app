@@ -126,10 +126,23 @@ export const GetAllBlogs = async (req, res) => {
 export const GetBlogsById = async (req, res) => {
     try {
         const { id } = req.params;
-        const blog = await BlogModel.findById(id).populate({
-            path: "createdBy",
-            select: "_id name profilepic",
-        });
+
+        // Fetch the blog with populated comments and nested replies
+        const blog = await BlogModel.findById(id)
+            .populate({
+                path: "createdBy",
+                select: "_id name profilepic",
+            })
+            .populate({
+                path: "comments",
+                populate: [
+                    { path: "createdBy", select: "_id name profilepic" }, // Populate comment authors
+                    {
+                        path: "replies",
+                        populate: { path: "createdBy", select: "_id name profilepic" }, // Populate reply authors
+                    },
+                ],
+            });
 
         if (!blog) {
             return res.status(404).json({
@@ -140,7 +153,7 @@ export const GetBlogsById = async (req, res) => {
 
         return res.status(200).json({
             status: "success",
-            blog, // Return the blog object
+            blog, // Return the blog object with comments and replies
         });
     } catch (error) {
         return res.status(400).json({
@@ -149,3 +162,4 @@ export const GetBlogsById = async (req, res) => {
         });
     }
 };
+
