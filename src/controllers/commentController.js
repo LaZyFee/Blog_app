@@ -7,7 +7,6 @@ export const createComment = async (req, res) => {
         const { user_id } = req.headers;
         const { blog_id } = req.params;
         const { comment } = req.body;
-        console.log(req.body);
 
         if (!comment) {
             return res.status(400).json({ status: "failed", message: "Comment content is required." });
@@ -17,13 +16,11 @@ export const createComment = async (req, res) => {
         if (!user) {
             return res.status(404).json({ status: "failed", message: "User not found." });
         }
-        console.log(user);
         const newComment = await CommentModel.create({
             comment,
             createdBy: user_id,
             parent: blog_id,
         });
-        console.log(newComment);
 
         // Add comment ID to the blog's comments array
         await BlogModel.findByIdAndUpdate(blog_id, {
@@ -49,27 +46,23 @@ export const createComment = async (req, res) => {
 export const updateComment = async (req, res) => {
     try {
         const { user_id } = req.headers;
-        const { blog_id } = req.params;
-        const { comment, status } = req.body;
+        const { blog_id, comment_id } = req.params;
+        const { comment } = req.body;
 
         // Find the comment
-        const existingComment = await CommentModel.findOne({
-            _id: req.params.comment_id,
-            createdBy: user_id,
-            parent: blog_id,
-        });
+        const existingComment = await CommentModel.findById(comment_id);
 
         if (!existingComment) {
-            return res.status(404).json({
-                status: "failed",
-                message: "Comment not found or unauthorized.",
-            });
+            return res.status(404).json({ status: "failed", message: "Comment not found." });
         }
 
-        // Update fields
-        if (comment) existingComment.comment = comment;
-        if (status) existingComment.status = status;
+        // Check if the user is authorized to update the comment
+        if (existingComment.createdBy.toString() !== user_id) {
+            return res.status(403).json({ status: "failed", message: "You are not authorized to update this comment." });
+        }
 
+        // Update the comment
+        existingComment.comment = comment || existingComment.comment;
         await existingComment.save();
 
         res.status(200).json({
@@ -86,17 +79,19 @@ export const updateComment = async (req, res) => {
     }
 };
 
+
 // Delete (soft delete) a comment
 export const deleteComment = async (req, res) => {
     try {
         const { user_id } = req.headers;
         const { blog_id, comment_id } = req.params;
 
-        const deletedComment = await CommentModel.findOneAndUpdate(
-            { _id: comment_id, createdBy: user_id, parent: blog_id },
-            { deleted: true }, // Soft delete by flagging
-            { new: true }
-        );
+        // Permanently delete the comment
+        const deletedComment = await CommentModel.findOneAndDelete({
+            _id: comment_id,
+            createdBy: user_id,
+            parent: blog_id,
+        });
 
         if (!deletedComment) {
             return res.status(404).json({
@@ -105,11 +100,12 @@ export const deleteComment = async (req, res) => {
             });
         }
 
+        // Decrement the comments count in the associated blog
         await BlogModel.findByIdAndUpdate(blog_id, { $inc: { commentsCount: -1 } });
 
         res.status(200).json({
             status: "success",
-            message: "Comment deleted successfully.",
+            message: "Comment deleted permanently.",
         });
     } catch (error) {
         res.status(500).json({
@@ -120,25 +116,23 @@ export const deleteComment = async (req, res) => {
     }
 };
 
-
 // Get all comments for a blog with pagination
 export const getAllComments = async (req, res) => {
     try {
         const { blog_id } = req.params;
 
         // Fetch comments with their replies and respective user details
-        const comments = await CommentModel.find({ parent: blog_id, type: "comment", deleted: false })
+        const comments = await CommentModel.find({ parent: blog_id, type: "comment" })
             .populate("createdBy", "name profilepic")
             .populate({
                 path: "replies",
-                match: { deleted: false }, // Ensure replies are active
                 populate: { path: "createdBy", select: "name profilepic" },
             })
             .sort({ createdAt: -1 });
 
 
         // Count total comments for pagination
-        const totalComments = await CommentModel.countDocuments({ parent: blog_id, deleted: false });
+        const totalComments = await CommentModel.countDocuments({ parent: blog_id });
 
         res.status(200).json({
             status: "success",

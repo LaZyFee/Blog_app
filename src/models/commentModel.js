@@ -6,9 +6,15 @@ const commentSchema = new mongoose.Schema(
         createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
         parent: { type: mongoose.Schema.Types.ObjectId, ref: "Blog", required: true },
         replies: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
+        reactions: [
+            {
+                user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+                type: { type: String, enum: ["like", "dislike"], required: true },
+            },
+        ],
+
         likes: { type: Number, default: 0 },
-        status: { type: String, default: "active" },
-        deleted: { type: Boolean, default: false },
+        disLikes: { type: Number, default: 0 },
         type: { type: String, enum: ["comment", "reply"], default: "comment" },
     },
     { timestamps: true }

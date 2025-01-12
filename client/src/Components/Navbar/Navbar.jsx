@@ -66,7 +66,7 @@ function Navbar({ onDropdownToggle }) {
               <div
                 className={`dropdown-content ${
                   dropdownOpen
-                    ? "absolute top-full left-0 w-screen z-50 bg-base-100 lg:relative lg:mx-auto"
+                    ? "absolute top-full left-0 w-screen z-50 bg-base-100 lg:relative lg:mx-auto lg:mt-5"
                     : ""
                 } container mx-auto bg-base-100`}
                 onClick={() => {

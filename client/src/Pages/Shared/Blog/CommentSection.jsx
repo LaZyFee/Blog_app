@@ -1,13 +1,11 @@
-/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
-import { SlDislike, SlLike } from "react-icons/sl";
-import { AiFillLike } from "react-icons/ai";
-import { BiSolidDislike } from "react-icons/bi";
 import { IoMdTime } from "react-icons/io";
 import { useAuth } from "../../../Store/AuthStore";
 import useCommentsStore from "../../../Store/CommentStore";
 import { formatDate } from "../../../Utils/formatedate";
+import { Link } from "react-router-dom";
+import UserReact from "../../../Utils/UserReact";
 
 function CommentSection({ blogId }) {
   const { user } = useAuth();
@@ -20,13 +18,12 @@ function CommentSection({ blogId }) {
     toggleLike,
     addReply,
   } = useCommentsStore();
+  console.log(comments);
 
   const [commentInput, setCommentInput] = useState("");
   const [replyInput, setReplyInput] = useState({});
   const [showReplies, setShowReplies] = useState({});
-  const [likeStatus, setLikeStatus] = useState({});
   const [commentsToShow, setCommentsToShow] = useState(8);
-  console.log(comments);
 
   useEffect(() => {
     if (blogId) fetchComments(blogId);
@@ -108,36 +105,13 @@ function CommentSection({ blogId }) {
               </div>
             </div>
             <p className="mt-1">{reply.comment}</p>
-            <div className="flex items-center gap-2 text-sm text-gray-500 mt-2">
-              <button
-                className={`flex items-center gap-1 ${
-                  likeStatus[reply._id] === "like" ? "text-blue-500" : ""
-                }`}
-                onClick={() => toggleLike(reply._id, "like")}
-              >
-                {likeStatus[reply._id] === "like" ? <AiFillLike /> : <SlLike />}
-                <span className="ml-1">{reply.likes || 0}</span>
-              </button>
-              <button
-                className={`flex items-center gap-1 ${
-                  likeStatus[reply._id] === "dislike" ? "text-red-500" : ""
-                }`}
-                onClick={() => toggleLike(reply._id, "dislike")}
-              >
-                {likeStatus[reply._id] === "dislike" ? (
-                  <BiSolidDislike />
-                ) : (
-                  <SlDislike />
-                )}
-                <span className="ml-1">{reply.dislikes || 0}</span>
-              </button>
-              {/* <button
-                onClick={() => toggleReply(reply._id)}
-                className="text-blue-500 hover:underline"
-              >
-                Reply
-              </button> */}
-            </div>
+            <UserReact
+              id={reply._id}
+              likes={reply.likes || 0}
+              dislikes={reply.dislikes || 0}
+              reactions={reply.reactions || []}
+              toggleLike={(id, action) => toggleLike(id, action)}
+            />
 
             {replyInput[reply._id] !== undefined && (
               <div className="reply-container mt-2 flex items-center">
@@ -179,29 +153,47 @@ function CommentSection({ blogId }) {
   return (
     <div className="mt-8">
       {user ? (
-        <div className="flex items-center">
+        <div className="flex items-center max-w-2xl">
           <img
-            src={`${import.meta.env.VITE_BACKEND_URL}/${user.profilePic}`}
-            alt={user.name}
-            className="w-10 h-10 rounded-full mr-4"
+            src={
+              user.profilePic
+                ? `${
+                    import.meta.env.VITE_BACKEND_URL
+                  }/${user.profilePic.replace(/^src\//, "")}`
+                : "/default-profile.png"
+            }
+            alt={user.name || "User"}
+            className="w-10 h-10 rounded-full mr-4 object-cover"
           />
           <input
             type="text"
             value={commentInput}
             onChange={(e) => setCommentInput(e.target.value)}
             placeholder="Write a comment..."
-            className="flex-grow border rounded px-4 py-2"
+            className="flex-grow border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
           <button
             onClick={handleCreateComment}
-            className="ml-4 bg-blue-500 text-white px-4 py-2 rounded"
+            disabled={!commentInput.trim()} // Disable if input is empty
+            className={`ml-4 px-4 py-2 rounded ${
+              commentInput.trim()
+                ? "bg-blue-500 text-white hover:bg-blue-600"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+            }`}
           >
             Post
           </button>
         </div>
       ) : (
-        ""
+        <p className="text-center text-xl font-bold ">
+          Please{" "}
+          <Link to="/login" className="text-primary">
+            Login
+          </Link>{" "}
+          first to put your valuable comment
+        </p>
       )}
+
       <div className="mt-8">
         {comments.slice(0, commentsToShow).map((comment) => (
           <div key={comment._id} className="rounded-lg mb-6 border p-4">
@@ -229,38 +221,19 @@ function CommentSection({ blogId }) {
             </div>
             <p className="mt-2 ml-10">{comment.comment}</p>
             <div className="flex items-center gap-2 text-sm text-gray-500 mt-2 ml-10">
-              <button
-                className={`flex items-center gap-1 ${
-                  likeStatus[comment._id] === "like" ? "text-blue-500" : ""
-                }`}
-                onClick={() => toggleLike(comment._id, "like")}
-              >
-                {likeStatus[comment._id] === "like" ? (
-                  <AiFillLike />
-                ) : (
-                  <SlLike />
-                )}
-                <span className="ml-1">{comment.likes || 0}</span>
-              </button>
-              <button
-                className={`flex items-center gap-1 ${
-                  likeStatus[comment._id] === "dislike" ? "text-red-500" : ""
-                }`}
-                onClick={() => toggleLike(comment._id, "dislike")}
-              >
-                {likeStatus[comment._id] === "dislike" ? (
-                  <BiSolidDislike />
-                ) : (
-                  <SlDislike />
-                )}
-                <span className="ml-1">{comment.dislikes || 0}</span>
-              </button>
+              <UserReact
+                id={comment._id}
+                likes={comment.likes || 0}
+                dislikes={comment.dislikes || 0}
+                reactions={comment.reactions || []}
+                toggleLike={(id, action) => toggleLike(id, action)}
+              />
               <button
                 onClick={() => toggleReply(comment._id)}
                 className="text-blue-500 hover:underline"
               >
                 Reply
-              </button>
+              </button>{" "}
             </div>
 
             {replyInput[comment._id] !== undefined && (

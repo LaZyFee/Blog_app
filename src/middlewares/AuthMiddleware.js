@@ -14,7 +14,6 @@ export default (req, res, next) => {
         const decoded = TokenDecode(token);
         req.headers.email = decoded.email;
         req.headers.user_id = decoded.userId;
-        console.log(decoded.email, decoded.userId);
         next();
     } catch (err) {
         res.status(401).json({ status: "fail", message: "Invalid Token" });

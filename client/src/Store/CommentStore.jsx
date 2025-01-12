@@ -141,42 +141,39 @@ const useCommentsStore = create((set, get) => ({
     }
   },
 
-  // Toggle like/unlike for a comment or reply
-  toggleLike: async (id, action, isReply = false) => {
-    const { comments } = get();
+  toggleLike: async (id, action) => {
+    const { comments } = get(); // Get the current state of comments
     try {
       const response = await axiosInstance.patch(`/${id}/like-unlike`, null, {
-        params: { action, isReply },
+        params: { action }, // Pass action as a query parameter
       });
 
-      if (isReply) {
-        set({
-          comments: comments.map((comment) => ({
-            ...comment,
-            replies: comment.replies.map((reply) =>
-              reply._id === id
-                ? { ...reply, likes: response.data.likes }
-                : reply
-            ),
-          })),
-        });
-      } else {
-        set({
-          comments: comments.map((comment) =>
-            comment._id === id
-              ? { ...comment, likes: response.data.likes }
-              : comment
-          ),
-        });
+      if (!response || !response.data || !response.data.data) {
+        throw new Error("Invalid response format");
       }
-    } catch (error) {
-      set({ error: error.message });
-    }
-  },
 
-  // Reset the store (optional utility for testing or clearing state)
-  resetStore: () => {
-    set({ comments: [], isLoading: false, error: null });
+      const updatedData = response.data;
+
+      // Log the updated data
+      console.log("Updated data from server:", updatedData);
+
+      // Update the state
+      set({
+        comments: comments.map((comment) =>
+          comment._id === id
+            ? {
+                ...comment,
+                likes: updatedData.likes || 0,
+                dislikes: updatedData.dislikes || 0,
+                reactions: updatedData.userReaction || [],
+              }
+            : comment
+        ),
+      });
+    } catch (error) {
+      console.error("Error toggling like:", error.message);
+      set({ error: error.response?.data?.message || "Failed to toggle like" });
+    }
   },
 }));
 

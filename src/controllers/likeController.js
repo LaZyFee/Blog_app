@@ -1,45 +1,92 @@
+import mongoose from "mongoose";
+import { CommentModel } from "../models/commentModel.js";
+
 export const toggleLike = async (req, res) => {
     try {
-        const { id } = req.params; // ID of comment or reply
-        const { action } = req.query; // "like" or "unlike"
-        const { isReply } = req.query; // true if targeting a reply
+        const { id } = req.params;
+        const { action } = req.query;
+        const { user_id } = req.headers;
 
-        const increment = action === "like" ? 1 : -1;
+        console.log(id, action, user_id);
+        console.log(typeof action);
 
-        let updatedDocument;
+        // Validate `id`
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ status: "failed", message: "Invalid comment ID format." });
+        }
 
-        if (isReply === "true") {
-            // Update likes in a reply
-            updatedDocument = await CommentModel.findOneAndUpdate(
-                { "replies._id": id },
-                { $inc: { "replies.$.likes": increment } },
-                { new: true }
-            );
+        // Validate `action`
+        if (!["like", "dislike"].includes(action)) {
+            return res.status(400).json({ status: "failed", message: "Invalid action. Must be 'like' or 'dislike'." });
+        }
+
+        // Validate `user_id`
+        if (!user_id) {
+            return res.status(400).json({ status: "failed", message: "User ID is required." });
+        }
+
+        // Find the comment
+        const comment = await CommentModel.findById(id);
+        console.log("comment", comment);
+        if (!comment) {
+            return res.status(404).json({ status: "failed", message: "Comment not found." });
+        }
+
+        // Check if the user already reacted
+        const existingReactionIndex = comment.reactions.findIndex(
+            (reaction) => reaction.user.toString() === user_id
+        );
+        console.log("existingReactionIndex", existingReactionIndex);
+
+        // Update the reaction
+        if (existingReactionIndex > -1) {
+            const existingReaction = comment.reactions[existingReactionIndex];
+            console.log("existingReaction", existingReaction);
+
+            if (existingReaction.type === action) {
+                // Undo the reaction
+                comment.reactions.splice(existingReactionIndex, 1);
+                action === "like" ? comment.likes-- : comment.disLikes--;
+            } else {
+                // Update reaction type
+                comment.reactions[existingReactionIndex].type = action;
+                if (action === "like") {
+                    comment.likes++;
+                    comment.disLikes--;
+                } else {
+                    comment.likes--;
+                    comment.disLikes++;
+                }
+            }
         } else {
-            // Update likes in a comment
-            updatedDocument = await CommentModel.findByIdAndUpdate(
-                id,
-                { $inc: { likes: increment } },
-                { new: true }
-            );
+            // Add new reaction
+            comment.reactions.push({ user: user_id, type: action });
+            action === "like" ? comment.likes++ : comment.disLikes++;
         }
 
-        if (!updatedDocument) {
-            return res.status(404).json({
-                status: "failed",
-                message: isReply === "true" ? "Reply not found." : "Comment not found.",
-            });
-        }
+        // Save the updated comment
+        const updatedComment = await comment.save();
+        console.log("updatedComment", updatedComment);
+
+        // Get the updated user reaction
+        const userReaction = comment.reactions.find(
+            (reaction) => reaction.user.toString() === user_id
+        );
+        console.log("userReaction", userReaction);
 
         res.status(200).json({
             status: "success",
-            message: `${isReply === "true" ? "Reply" : "Comment"} ${action}d successfully.`,
-            data: updatedDocument,
+            data: {
+                likes: comment.likes,
+                dislikes: comment.disLikes,
+                userReaction: userReaction ? userReaction.type : null,
+            },
         });
     } catch (error) {
+        console.error(error);
         res.status(500).json({
             status: "failed",
-            message: `Error ${action}ing ${isReply === "true" ? "reply" : "comment"}.`,
+            message: "Internal Server Error",
             error: error.message,
         });
     }

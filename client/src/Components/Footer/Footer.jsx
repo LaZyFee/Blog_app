@@ -15,6 +15,7 @@ function Footer() {
           <Link
             className="hover:text-white font-semibold py-2 px-4"
             key={item.name}
+            to={item.path}
           >
             {item.name}
           </Link>
