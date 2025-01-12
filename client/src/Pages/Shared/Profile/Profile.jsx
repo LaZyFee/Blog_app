@@ -6,46 +6,43 @@ import { Link } from "react-router-dom";
 function Profile() {
   const { user } = useAuth();
   const { userProfile, isLoading, error, getProfile } = useTeamStore();
-  console.log(userProfile);
 
   useEffect(() => {
     if (user?._id) {
       getProfile(user._id);
     }
   }, [user, getProfile]);
-  console.log(userProfile);
 
   return (
     <div className="w-full">
-      {/* Display profile card */}
       {isLoading ? (
         <p className="text-center text-lg text-indigo-600">
           Loading profile...
         </p>
       ) : error ? (
         <p className="text-center text-red-500 font-semibold">Error: {error}</p>
-      ) : (
-        userProfile && (
-          <div className="card card-side bg-gradient-to-r from-blue-100 to-indigo-200 p-6 rounded-lg flex items-center">
-            <figure className="flex-shrink-0">
-              <img
-                src={`${
-                  import.meta.env.VITE_BACKEND_URL
-                }/${user.profilePic.replace(/^src\//, "")}`}
-                className="rounded-full w-36 h-36 md:w-48 md:h-48 border-4 border-indigo-300 shadow-lg"
-                alt="user profile"
-              />
-            </figure>
-            <div className="card-body ml-6">
-              <h2 className="card-title text-2xl font-bold text-gray-800">
-                {userProfile.name || "Unknown User"}
-              </h2>
-              <p className="text-lg  -100 mt-2">
-                {userProfile.email || "No email available"}
-              </p>
-            </div>
+      ) : user && userProfile ? ( // Check if user exists before rendering
+        <div className="card card-side bg-gradient-to-r from-blue-100 to-indigo-200 p-6 rounded-lg flex items-center">
+          <figure className="flex-shrink-0">
+            <img
+              src={`${
+                import.meta.env.VITE_BACKEND_URL
+              }/${user.profilePic?.replace(/^src\//, "")}`}
+              className="rounded-full w-36 h-36 md:w-48 md:h-48 border-4 border-indigo-300 shadow-lg"
+              alt="user profile"
+            />
+          </figure>
+          <div className="card-body ml-6">
+            <h2 className="card-title text-2xl font-bold text-gray-800">
+              {userProfile.name || "Unknown User"}
+            </h2>
+            <p className="text-lg -100 mt-2">
+              {userProfile.email || "No email available"}
+            </p>
           </div>
-        )
+        </div>
+      ) : (
+        <p className="text-center text-gray-500 mt-4">User not logged in.</p>
       )}
 
       {/* Team Members */}

@@ -1,3 +1,4 @@
+/* eslint-disable  */
 import { useState, useEffect } from "react";
 import { SlDislike, SlLike } from "react-icons/sl";
 import { AiFillLike } from "react-icons/ai";

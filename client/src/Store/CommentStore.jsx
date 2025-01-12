@@ -157,9 +157,6 @@ const useCommentsStore = create((set, get) => ({
         throw new Error("Invalid response format");
       }
 
-      // Log the updated data
-      console.log("Updated data from server:", updatedData);
-
       // Update the state
       set({
         comments: comments.map((comment) =>

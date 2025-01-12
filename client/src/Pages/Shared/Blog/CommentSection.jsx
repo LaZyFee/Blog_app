@@ -18,7 +18,6 @@ function CommentSection({ blogId }) {
     toggleLike,
     addReply,
   } = useCommentsStore();
-  console.log(comments);
 
   const [commentInput, setCommentInput] = useState("");
   const [replyInput, setReplyInput] = useState({});
@@ -105,13 +104,17 @@ function CommentSection({ blogId }) {
               </div>
             </div>
             <p className="mt-1">{reply.comment}</p>
-            <UserReact
-              id={reply._id}
-              likes={reply.likes || 0}
-              dislikes={reply.disLikes || 0}
-              reactions={reply.reactions || []}
-              toggleLike={(id, action) => toggleLike(id, action)}
-            />
+            {user ? (
+              <UserReact
+                id={reply._id}
+                likes={reply.likes || 0}
+                dislikes={reply.disLikes || 0}
+                reactions={reply.reactions || []}
+                toggleLike={(id, action) => toggleLike(id, action)}
+              />
+            ) : (
+              ""
+            )}
 
             {replyInput[reply._id] !== undefined && (
               <div className="reply-container mt-2 flex items-center">
@@ -221,19 +224,26 @@ function CommentSection({ blogId }) {
             </div>
             <p className="mt-2 ml-10">{comment.comment}</p>
             <div className="flex items-center gap-2 text-sm text-gray-500 mt-2 ml-10">
-              <UserReact
-                id={comment._id}
-                likes={comment.likes || 0}
-                dislikes={comment.disLikes || 0}
-                reactions={comment.reactions || []}
-                toggleLike={(id, action) => toggleLike(id, action)}
-              />
-              <button
-                onClick={() => toggleReply(comment._id)}
-                className="text-blue-500 hover:underline"
-              >
-                Reply
-              </button>{" "}
+              {user ? (
+                <>
+                  <UserReact
+                    id={comment._id}
+                    likes={comment.likes || 0}
+                    dislikes={comment.disLikes || 0}
+                    reactions={comment.reactions || []}
+                    toggleLike={(id, action) => toggleLike(id, action)}
+                    blogId={blogId} // Pass the blogId here
+                  />
+                  <button
+                    onClick={() => toggleReply(comment._id)}
+                    className="text-blue-500 hover:underline"
+                  >
+                    Reply
+                  </button>
+                </>
+              ) : (
+                ""
+              )}
             </div>
 
             {replyInput[comment._id] !== undefined && (

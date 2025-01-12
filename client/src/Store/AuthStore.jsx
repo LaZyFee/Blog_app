@@ -72,18 +72,4 @@ export const useAuth = create((set) => ({
       throw error;
     }
   },
-
-  // Sync across tabs
-  syncUserAcrossTabs: () => {
-    window.addEventListener("storage", (event) => {
-      if (event.key === "user") {
-        const user = JSON.parse(event.newValue);
-        const isAuthenticated = !!user;
-        set({ user, isAuthenticated });
-      }
-    });
-  },
 }));
-
-// Initialize the sync across tabs functionality
-useAuth.getState().syncUserAcrossTabs();
