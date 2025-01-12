@@ -152,7 +152,10 @@ const useCommentsStore = create((set, get) => ({
         throw new Error("Invalid response format");
       }
 
-      const updatedData = response.data;
+      const updatedData = response.data.data;
+      if (!updatedData) {
+        throw new Error("Invalid response format");
+      }
 
       // Log the updated data
       console.log("Updated data from server:", updatedData);

@@ -108,7 +108,7 @@ function CommentSection({ blogId }) {
             <UserReact
               id={reply._id}
               likes={reply.likes || 0}
-              dislikes={reply.dislikes || 0}
+              dislikes={reply.disLikes || 0}
               reactions={reply.reactions || []}
               toggleLike={(id, action) => toggleLike(id, action)}
             />
@@ -224,7 +224,7 @@ function CommentSection({ blogId }) {
               <UserReact
                 id={comment._id}
                 likes={comment.likes || 0}
-                dislikes={comment.dislikes || 0}
+                dislikes={comment.disLikes || 0}
                 reactions={comment.reactions || []}
                 toggleLike={(id, action) => toggleLike(id, action)}
               />

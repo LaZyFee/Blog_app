@@ -12,7 +12,8 @@ const UserReact = ({ id, likes, dislikes, reactions, toggleLike }) => {
 
   useEffect(() => {
     if (user?._id) {
-      const userReaction = reactions.find(
+      const reactionsArray = Array.isArray(reactions) ? reactions : [];
+      const userReaction = reactionsArray.find(
         (reaction) => reaction.user === user._id
       );
       if (userReaction) {
@@ -23,13 +24,10 @@ const UserReact = ({ id, likes, dislikes, reactions, toggleLike }) => {
 
   const handleToggle = async (action) => {
     const currentReaction = likeStatus; // Current reaction (like/dislike/null)
-    console.log("currentReaction :", currentReaction, typeof currentReaction);
-    const newAction = currentReaction === action ? null : action;
-
-    console.log("newAction :", newAction, typeof newAction);
+    const newAction = currentReaction === action ? "none" : action;
 
     // Optimistic UI update
-    setLikeStatus(newAction);
+    setLikeStatus(newAction === "none" ? null : action);
     if (newAction === "like") {
       setLikes(currentLikes + 1);
       if (currentReaction === "dislike") setDislikes(currentDislikes - 1);
@@ -38,50 +36,42 @@ const UserReact = ({ id, likes, dislikes, reactions, toggleLike }) => {
       if (currentReaction === "like") setLikes(currentLikes - 1);
     } else {
       if (currentReaction === "like") setLikes(currentLikes - 1);
-      if (currentReaction === "dislike") setDislikes(currentDislikes - 1);
+      else if (currentReaction === "dislike") setDislikes(currentDislikes - 1);
     }
 
+    // Call the API to update the reaction
     try {
-      const response = await toggleLike(id, newAction);
-
-      // Ensure response has the correct structure
-      const { likes, dislikes, userReaction } = response.data.data;
-
-      console.log("Updated data:", { likes, dislikes, userReaction });
-
-      // Sync state with backend response
-      setLikes(likes);
-      setDislikes(dislikes);
-      setLikeStatus(userReaction);
+      await toggleLike(id, newAction);
     } catch (error) {
-      console.error("Failed to toggle like/dislike:", error.message);
-
-      // Revert UI on failure
+      // Revert changes if the API call fails
       setLikeStatus(currentReaction);
-      setLikes(currentLikes);
-      setDislikes(currentDislikes);
+      if (currentReaction === "like") setLikes(currentLikes);
+      else if (currentReaction === "dislike") setDislikes(currentDislikes);
+      else {
+        if (newAction === "like") setLikes(currentLikes - 1);
+        if (newAction === "dislike") setDislikes(currentDislikes - 1);
+      }
     }
   };
 
   return (
-    <div className="flex items-center gap-2 text-sm text-gray-500 mt-2">
+    <div className="flex items-center gap-2">
       <button
-        className={`flex items-center gap-1 ${
-          likeStatus === "like" ? "text-blue-500" : ""
-        }`}
         onClick={() => handleToggle("like")}
+        className={`flex items-center gap-1 ${
+          likeStatus === "like" ? "text-blue-500" : "text-gray-500"
+        }`}
       >
-        {likeStatus === "like" ? <AiFillLike /> : <SlLike />}
-        <span className="ml-1">{currentLikes}</span>
+        {likeStatus === "like" ? <AiFillLike /> : <SlLike />} {currentLikes}
       </button>
       <button
-        className={`flex items-center gap-1 ${
-          likeStatus === "dislike" ? "text-red-500" : ""
-        }`}
         onClick={() => handleToggle("dislike")}
+        className={`flex items-center gap-1 ${
+          likeStatus === "dislike" ? "text-red-500" : "text-gray-500"
+        }`}
       >
-        {likeStatus === "dislike" ? <BiSolidDislike /> : <SlDislike />}
-        <span className="ml-1">{currentDislikes}</span>
+        {likeStatus === "dislike" ? <BiSolidDislike /> : <SlDislike />}{" "}
+        {currentDislikes}
       </button>
     </div>
   );
