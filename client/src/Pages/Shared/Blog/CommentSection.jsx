@@ -110,7 +110,9 @@ function CommentSection({ blogId }) {
                 likes={reply.likes || 0}
                 dislikes={reply.disLikes || 0}
                 reactions={reply.reactions || []}
-                toggleLike={(id, action) => toggleLike(id, action)}
+                toggleLike={(id, action) =>
+                  toggleLike(id, action, "reply", reply.parent)
+                }
               />
             ) : (
               ""
@@ -231,9 +233,11 @@ function CommentSection({ blogId }) {
                     likes={comment.likes || 0}
                     dislikes={comment.disLikes || 0}
                     reactions={comment.reactions || []}
-                    toggleLike={(id, action) => toggleLike(id, action)}
-                    blogId={blogId} // Pass the blogId here
+                    toggleLike={(id, action) =>
+                      toggleLike(id, action, "comment")
+                    }
                   />
+
                   <button
                     onClick={() => toggleReply(comment._id)}
                     className="text-blue-500 hover:underline"

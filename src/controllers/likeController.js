@@ -1,15 +1,22 @@
 import mongoose from "mongoose";
 import { CommentModel } from "../models/commentModel.js";
+import { BlogModel } from "../models/blogModel.js";
 
 export const toggleLike = async (req, res) => {
     try {
         const { id } = req.params;
-        const { action } = req.query;
+        const { action, type } = req.query; // `type` specifies 'comment' or 'blog'
         const { user_id } = req.headers;
+        console.log("toggleLike action:", action, "type:", type, "id:", id, "user_id:", user_id);
+
+        // Validate `type`
+        if (!["comment", "reply", "blog"].includes(type)) {
+            return res.status(400).json({ status: "failed", message: "Invalid type. Must be 'comment' or 'blog'." });
+        }
 
         // Validate `id`
         if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).json({ status: "failed", message: "Invalid comment ID format." });
+            return res.status(400).json({ status: "failed", message: `Invalid ${type} ID format.` });
         }
 
         // Validate `action`
@@ -22,59 +29,62 @@ export const toggleLike = async (req, res) => {
             return res.status(400).json({ status: "failed", message: "User ID is required." });
         }
 
-        // Find the comment
-        const comment = await CommentModel.findById(id);
-        if (!comment) {
-            return res.status(404).json({ status: "failed", message: "Comment not found." });
+        // Determine model based on `type`
+        const Model = type === "comment" || type === "reply" ? CommentModel : BlogModel;
+
+        // Find the document
+        const doc = await Model.findById(id);
+        if (!doc) {
+            return res.status(404).json({ status: "failed", message: `${type.charAt(0).toUpperCase() + type.slice(1)} not found.` });
         }
 
         // Check if the user already reacted
-        const existingReactionIndex = comment.reactions.findIndex(
+        const existingReactionIndex = doc.reactions.findIndex(
             (reaction) => reaction.user.toString() === user_id
         );
 
         if (existingReactionIndex > -1) {
-            const existingReaction = comment.reactions[existingReactionIndex];
+            const existingReaction = doc.reactions[existingReactionIndex];
 
             if (action === "none") {
                 // Undo reaction
-                comment.reactions.splice(existingReactionIndex, 1);
-                if (existingReaction.type === "like") comment.likes--;
-                if (existingReaction.type === "dislike") comment.disLikes--;
+                doc.reactions.splice(existingReactionIndex, 1);
+                if (existingReaction.type === "like") doc.likes--;
+                if (existingReaction.type === "dislike") doc.disLikes--;
             } else if (existingReaction.type === action) {
                 // If the same action is clicked, undo it
-                comment.reactions.splice(existingReactionIndex, 1);
-                action === "like" ? comment.likes-- : comment.disLikes--;
+                doc.reactions.splice(existingReactionIndex, 1);
+                action === "like" ? doc.likes-- : doc.disLikes--;
             } else {
                 // Change reaction type
-                comment.reactions[existingReactionIndex].type = action;
+                doc.reactions[existingReactionIndex].type = action;
                 if (action === "like") {
-                    comment.likes++;
-                    comment.disLikes--;
+                    doc.likes++;
+                    doc.disLikes--;
                 } else {
-                    comment.likes--;
-                    comment.disLikes++;
+                    doc.likes--;
+                    doc.disLikes++;
                 }
             }
         } else if (action !== "none") {
             // Add a new reaction
-            comment.reactions.push({ user: user_id, type: action });
-            action === "like" ? comment.likes++ : comment.disLikes++;
+            doc.reactions.push({ user: user_id, type: action });
+            action === "like" ? doc.likes++ : doc.disLikes++;
         }
 
-        // Save the updated comment
-        const updatedComment = await comment.save();
+        // Save the updated document
+        const updatedDoc = await doc.save();
 
-        // Get the updated user reaction
-        const userReaction = comment.reactions.find(
-            (reaction) => reaction.user.toString() === user_id
-        );
+        // Ensure `userReaction` is an array (even if it's empty)
+        const userReaction = Array.isArray(doc.reactions)
+            ? doc.reactions.find((reaction) => reaction.user.toString() === user_id)
+            : null;
 
         res.status(200).json({
             status: "success",
             data: {
-                likes: updatedComment.likes,
-                dislikes: updatedComment.disLikes,
+                likes: updatedDoc.likes,
+                dislikes: updatedDoc.disLikes,
                 userReaction: userReaction ? userReaction.type : null,
             },
         });

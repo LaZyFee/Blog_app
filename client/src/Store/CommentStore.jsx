@@ -141,34 +141,44 @@ const useCommentsStore = create((set, get) => ({
     }
   },
 
-  toggleLike: async (id, action) => {
-    const { comments } = get(); // Get the current state of comments
+  toggleLike: async (id, action, type = "comment", parentId = null) => {
+    const { comments } = get();
     try {
       const response = await axiosInstance.patch(`/${id}/like-unlike`, null, {
-        params: { action }, // Pass action as a query parameter
+        params: { action, type },
       });
 
-      if (!response || !response.data || !response.data.data) {
-        throw new Error("Invalid response format");
-      }
-
       const updatedData = response.data.data;
-      if (!updatedData) {
-        throw new Error("Invalid response format");
-      }
 
-      // Update the state
       set({
-        comments: comments.map((comment) =>
-          comment._id === id
-            ? {
-                ...comment,
-                likes: updatedData.likes || 0,
-                dislikes: updatedData.dislikes || 0,
-                reactions: updatedData.userReaction || [],
-              }
-            : comment
-        ),
+        comments: comments.map((comment) => {
+          if (type === "comment" && comment._id === id) {
+            return {
+              ...comment,
+              likes: updatedData.likes || 0,
+              dislikes: updatedData.dislikes || 0,
+              reactions: updatedData.userReaction || [],
+            };
+          }
+
+          if (type === "reply" && comment._id === parentId) {
+            return {
+              ...comment,
+              replies: comment.replies.map((reply) =>
+                reply._id === id
+                  ? {
+                      ...reply,
+                      likes: updatedData.likes || 0,
+                      dislikes: updatedData.dislikes || 0,
+                      reactions: updatedData.userReaction || [],
+                    }
+                  : reply
+              ),
+            };
+          }
+
+          return comment;
+        }),
       });
     } catch (error) {
       console.error("Error toggling like:", error.message);
