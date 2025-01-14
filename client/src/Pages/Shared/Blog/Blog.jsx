@@ -96,7 +96,7 @@ function Blog() {
               <UserReact
                 id={blog._id}
                 likes={blog.likes}
-                dislikes={blog.dislikes}
+                dislikes={blog.disLikes}
                 reactions={blog.reactions}
                 toggleLike={toggleLike}
               />
