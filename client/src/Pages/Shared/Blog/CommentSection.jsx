@@ -6,6 +6,7 @@ import useCommentsStore from "../../../Store/CommentStore";
 import { formatDate } from "../../../Utils/formatedate";
 import { Link } from "react-router-dom";
 import UserReact from "../../../Utils/UserReact";
+import showToast from "../../../Utils/ShowToast";
 
 function CommentSection({ blogId }) {
   const { user } = useAuth();
@@ -104,19 +105,16 @@ function CommentSection({ blogId }) {
               </div>
             </div>
             <p className="mt-1">{reply.comment}</p>
-            {user ? (
-              <UserReact
-                id={reply._id}
-                likes={reply.likes || 0}
-                dislikes={reply.disLikes || 0}
-                reactions={reply.reactions || []}
-                toggleLike={(id, action) =>
-                  toggleLike(id, action, "reply", reply.parent)
-                }
-              />
-            ) : (
-              ""
-            )}
+
+            <UserReact
+              id={reply._id}
+              likes={reply.likes || 0}
+              dislikes={reply.disLikes || 0}
+              reactions={reply.reactions || []}
+              toggleLike={(id, action) =>
+                toggleLike(id, action, "reply", reply.parent)
+              }
+            />
 
             {replyInput[reply._id] !== undefined && (
               <div className="reply-container mt-2 flex items-center">
@@ -154,6 +152,19 @@ function CommentSection({ blogId }) {
       </div>
     );
   };
+
+  if (commentsLoading)
+    return (
+      <>
+        <div className="flex w-52 flex-col gap-4">
+          <div className="skeleton h-32 w-full"></div>
+          <div className="skeleton h-4 w-28"></div>
+          <div className="skeleton h-4 w-full"></div>
+          <div className="skeleton h-4 w-full"></div>
+        </div>
+      </>
+    );
+  if (commentsError) return <p>{commentsError}</p>;
 
   return (
     <div className="mt-8">
@@ -226,28 +237,32 @@ function CommentSection({ blogId }) {
             </div>
             <p className="mt-2 ml-10">{comment.comment}</p>
             <div className="flex items-center gap-2 text-sm text-gray-500 mt-2 ml-10">
-              {user ? (
-                <>
-                  <UserReact
-                    id={comment._id}
-                    likes={comment.likes || 0}
-                    dislikes={comment.disLikes || 0}
-                    reactions={comment.reactions || []}
-                    toggleLike={(id, action) =>
-                      toggleLike(id, action, "comment")
-                    }
-                  />
+              <UserReact
+                id={comment._id}
+                likes={comment.likes || 0}
+                dislikes={comment.disLikes || 0}
+                reactions={comment.reactions || []}
+                toggleLike={(id, action) => toggleLike(id, action, "comment")}
+              />
 
-                  <button
-                    onClick={() => toggleReply(comment._id)}
-                    className="text-blue-500 hover:underline"
-                  >
-                    Reply
-                  </button>
-                </>
-              ) : (
-                ""
-              )}
+              <button
+                onClick={() => {
+                  if (!user) {
+                    showToast(
+                      "Oops!",
+                      "Only logged-in users can reply.",
+                      "info"
+                    );
+                  } else {
+                    toggleReply(comment._id);
+                  }
+                }}
+                className={`text-blue-500 hover:underline ${
+                  !user ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+              >
+                Reply
+              </button>
             </div>
 
             {replyInput[comment._id] !== undefined && (

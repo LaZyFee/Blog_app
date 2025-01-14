@@ -1,9 +1,10 @@
-/* eslint-disable  */
+/* eslint-disable */
 import { useState, useEffect } from "react";
 import { SlDislike, SlLike } from "react-icons/sl";
 import { AiFillLike } from "react-icons/ai";
 import { BiSolidDislike } from "react-icons/bi";
 import { useAuth } from "../Store/AuthStore";
+import showToast from "./ShowToast";
 
 const UserReact = ({ id, likes, dislikes, reactions, toggleLike }) => {
   const { user } = useAuth();
@@ -23,46 +24,48 @@ const UserReact = ({ id, likes, dislikes, reactions, toggleLike }) => {
     }
   }, [user?._id, reactions]);
 
-  const handleLike = async () => {
-    const action = likeStatus === "like" ? "none" : "like";
-    try {
-      await toggleLike(id, action);
-      if (action === "like") {
-        setLikes((prev) => prev + 1);
-        if (likeStatus === "dislike") {
-          setDislikes((prev) => prev - 1);
-        }
-      } else if (action === "none") {
-        setLikes((prev) => prev - 1);
-      }
-      setLikeStatus(action);
-    } catch (error) {
-      console.error("Failed to toggle like:", error.message);
+  const handleReaction = async (type) => {
+    if (!user) {
+      // Show the toast and prevent any state changes
+      showToast("Oops!", "Only logged-in users can react.", "info");
+      return;
     }
-  };
 
-  const handleDislike = async () => {
-    const action = likeStatus === "dislike" ? "none" : "dislike";
+    const action = likeStatus === type ? "none" : type;
+
     try {
       await toggleLike(id, action);
-      if (action === "dislike") {
-        setDislikes((prev) => prev + 1);
-        if (likeStatus === "like") {
+
+      if (type === "like") {
+        if (action === "like") {
+          setLikes((prev) => prev + 1);
+          if (likeStatus === "dislike") {
+            setDislikes((prev) => prev - 1);
+          }
+        } else if (action === "none") {
           setLikes((prev) => prev - 1);
         }
-      } else if (action === "none") {
-        setDislikes((prev) => prev - 1);
+      } else if (type === "dislike") {
+        if (action === "dislike") {
+          setDislikes((prev) => prev + 1);
+          if (likeStatus === "like") {
+            setLikes((prev) => prev - 1);
+          }
+        } else if (action === "none") {
+          setDislikes((prev) => prev - 1);
+        }
       }
+
       setLikeStatus(action);
     } catch (error) {
-      console.error("Failed to toggle dislike:", error.message);
+      console.error("Failed to toggle reaction:", error.message);
     }
   };
 
   return (
     <div className="flex items-center gap-4">
       <button
-        onClick={handleLike}
+        onClick={() => handleReaction("like")}
         className={`flex items-center gap-1 ${
           likeStatus === "like" ? "text-blue-500" : "text-gray-500"
         }`}
@@ -71,7 +74,7 @@ const UserReact = ({ id, likes, dislikes, reactions, toggleLike }) => {
         <span>{currentLikes}</span>
       </button>
       <button
-        onClick={handleDislike}
+        onClick={() => handleReaction("dislike")}
         className={`flex items-center gap-1 ${
           likeStatus === "dislike" ? "text-red-500" : "text-gray-500"
         }`}

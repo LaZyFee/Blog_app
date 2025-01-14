@@ -12,4 +12,6 @@ router.post('/create-blog', AuthMiddleware, uploadBlogPic.single('image'), Creat
 router.put('/update-blog/:id', uploadBlogPic.single('image'), UpdateBlog)
 router.delete('/delete-blog/:id', DeleteBlog)
 router.patch("/:id/like-unlike", AuthMiddleware, toggleLike);
+
+
 export default router

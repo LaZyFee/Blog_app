@@ -37,7 +37,7 @@ function Footer() {
       <aside>
         <p className="text-left">Copyright © 2024 - All right reserved by</p>
         <a
-          href="https://github.com/LaZyFee"
+          href="https://rabiul-rafee-portfolio.netlify.app/"
           target="_blank"
           className="hover:font-extrabold hover:text-white font-bold text-2xl "
         >

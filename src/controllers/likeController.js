@@ -5,7 +5,7 @@ import { BlogModel } from "../models/blogModel.js";
 export const toggleLike = async (req, res) => {
     try {
         const { id } = req.params;
-        const { action, type } = req.query; // `type` specifies 'comment' or 'blog'
+        const { action, type } = req.query;
         const { user_id } = req.headers;
         console.log("toggleLike action:", action, "type:", type, "id:", id, "user_id:", user_id);
 

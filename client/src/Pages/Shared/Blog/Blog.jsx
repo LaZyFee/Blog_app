@@ -1,14 +1,13 @@
 import { useEffect } from "react";
 import useBlogStore from "../../../Store/BlogStore";
-import { SlDislike, SlLike } from "react-icons/sl";
-import { FaRegComment } from "react-icons/fa6";
-import Skeleton from "../../../Components/Skeleton";
 import { IoMdTime } from "react-icons/io";
 import { Link } from "react-router-dom";
+import Skeleton from "../../../Components/Skeleton";
 import { formatDate } from "../../../Utils/formatedate";
+import UserReact from "../../../Utils/UserReact";
 
 function Blog() {
-  const { blogs, fetchBlogs, loading, error } = useBlogStore();
+  const { blogs, fetchBlogs, loading, error, toggleLike } = useBlogStore();
 
   useEffect(() => {
     fetchBlogs();
@@ -93,13 +92,17 @@ function Blog() {
             </Link>
             <div className="divider"></div>
             <div className="flex justify-between items-center mt-4">
-              <div className="flex gap-3">
-                <SlLike className="text-primary text-xl hover:scale-110 cursor-pointer transition duration-200" />
-                <SlDislike className="text-primary text-xl hover:scale-110 cursor-pointer transition duration-200" />
-              </div>
+              {/* Pass the UserReact component */}
+              <UserReact
+                id={blog._id}
+                likes={blog.likes}
+                dislikes={blog.dislikes}
+                reactions={blog.reactions}
+                toggleLike={toggleLike}
+              />
+
               <Link to={"/blog-data"} state={{ blogId: blog._id }}>
                 <div className="flex items-center gap-1">
-                  <FaRegComment className="text-primary text-xl" />
                   <span className="text-sm text-gray-600">
                     ({blog.commentsCount || 0})
                   </span>

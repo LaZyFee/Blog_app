@@ -1,7 +1,7 @@
 import { create } from "zustand";
-import axios from "axios";
+import axiosInstance from "../Utils/axiosInstance";
 
-const useBlogStore = create((set) => ({
+const useBlogStore = create((set, get) => ({
   blogs: [], // Stores the list of blogs
   loading: false, // Tracks loading state
   error: null, // Tracks errors
@@ -10,7 +10,7 @@ const useBlogStore = create((set) => ({
   fetchBlogs: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await axios.get("/all-blogs");
+      const response = await axiosInstance.get("/all-blogs");
       set({ blogs: response.data.Blogs, loading: false });
     } catch (error) {
       set({
@@ -22,7 +22,7 @@ const useBlogStore = create((set) => ({
   fetchBlogById: async (id) => {
     set({ loading: true, error: null });
     try {
-      const response = await axios.get(`/blog/${id}`);
+      const response = await axiosInstance.get(`/blog/${id}`);
       set({ blog: response.data.blog, loading: false });
     } catch (error) {
       set({
@@ -43,7 +43,7 @@ const useBlogStore = create((set) => ({
         formData.append("image", blogData.image);
       }
 
-      const response = await axios.post("/api/blogs/create-blog", formData, {
+      const response = await axiosInstance.post("/create-blog", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           user_id: blogData.userId, // Assuming user_id is passed in blogData
@@ -62,29 +62,17 @@ const useBlogStore = create((set) => ({
   },
 
   // Update an existing blog
-  updateBlog: async (id, updatedData) => {
+  updateBlog: async (id, formData) => {
     set({ loading: true, error: null });
     try {
-      const formData = new FormData();
-      if (updatedData.title) formData.append("title", updatedData.title);
-      if (updatedData.content) formData.append("content", updatedData.content);
-      if (updatedData.removeImage) {
-        formData.append("removeImage", "true");
-      } else if (updatedData.image) {
-        formData.append("image", updatedData.image);
-      }
+      const response = await axiosInstance.put(`/update-blog/${id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-      const response = await axios.put(
-        `/api/blogs/update-blog/${id}`,
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
-
+      // Update the blogs state immediately
       set((state) => ({
         blogs: state.blogs.map((blog) =>
-          blog._id === id ? response.data : blog
+          blog._id === id ? { ...blog, ...response.data } : blog
         ),
         loading: false,
       }));
@@ -100,7 +88,7 @@ const useBlogStore = create((set) => ({
   deleteBlog: async (id) => {
     set({ loading: true, error: null });
     try {
-      await axios.delete(`/api/blogs/delete-blog/${id}`);
+      await axiosInstance.delete(`/delete-blog/${id}`);
       set((state) => ({
         blogs: state.blogs.filter((blog) => blog._id !== id),
         loading: false,
@@ -110,6 +98,36 @@ const useBlogStore = create((set) => ({
         error: error.response?.data?.message || "Failed to delete blog",
         loading: false,
       });
+      console.error("Error deleting blog:", error);
+    }
+  },
+
+  // Toggle like or dislike for a blog
+  toggleLike: async (id, action, type = "blog") => {
+    const { blogs } = get();
+    try {
+      const response = await axiosInstance.patch(`/${id}/like-unlike`, null, {
+        params: { action, type },
+      });
+
+      const updatedData = response.data.data;
+
+      // Update the specific blog in the state
+      set({
+        blogs: blogs.map((blog) =>
+          blog._id === id
+            ? {
+                ...blog,
+                likes: updatedData.likes || 0,
+                dislikes: updatedData.dislikes || 0,
+                userReaction: updatedData.userReaction || null,
+              }
+            : blog
+        ),
+      });
+    } catch (error) {
+      console.error("Error toggling like:", error.message);
+      set({ error: error.response?.data?.message || "Failed to toggle like" });
     }
   },
 }));

@@ -58,30 +58,50 @@ export const CreateBlog = async (req, res) => {
 
 export const UpdateBlog = async (req, res) => {
     try {
-        const existingBlog = await BlogModel.findById(req.params.id);
+        const { id } = req.params;
+        const { title, content, removeImage } = req.body; // Include removeImage in the destructure
+
+        // Fetch the existing blog by ID
+        const existingBlog = await BlogModel.findById(id);
         if (!existingBlog) {
-            return res.status(404).json({ status: "Failed", message: "No data found with this id" });
+            return res.status(404).json({
+                status: "failed",
+                message: "Blog not found."
+            });
         }
 
+        // Prepare the fields to update
         const updateFields = {};
 
-        if (req.body.title) updateFields.title = req.body.title;
-        if (req.body.content) updateFields.content = req.body.content;
+        if (title) updateFields.title = title;
+        if (content) updateFields.content = content;
 
-        if (req.body.removeImage === "true") {
-            deleteImage(existingBlog.image);
-            updateFields.image = null;
+        // Handle image removal
+        if (removeImage === "true") { // `removeImage` comes as a string from form-data
+            deleteImage(existingBlog.image); // Delete existing image from the server
+            updateFields.image = null; // Set the image to null
+        } else if (req.file) {
+            // Handle image upload
+            deleteImage(existingBlog.image); // Delete the old image if a new one is uploaded
+            updateFields.image = req.file.path.replace(/\\/g, "/"); // Normalize file path
         }
 
-        if (req.file && req.body.removeImage !== "true") {
-            deleteImage(existingBlog.image);
-            updateFields.image = req.file.path.replace(/\\/g, "/");
-        }
+        // Update the blog document
+        const updatedBlog = await BlogModel.findByIdAndUpdate(id, updateFields, { new: true });
 
-        const updatedBlog = await BlogModel.findByIdAndUpdate(req.params.id, updateFields, { new: true });
-        res.status(200).json(updatedBlog);
+        // Return the updated blog information
+        res.status(200).json({
+            status: "success",
+            message: "Blog updated successfully.",
+            data: updatedBlog,
+        });
     } catch (error) {
-        res.status(400).json({ status: "Failed", message: error.toString() });
+        console.error("Error updating blog:", error);
+        res.status(500).json({
+            status: "failed",
+            message: "Error updating blog.",
+            error: error.message,
+        });
     }
 };
 
