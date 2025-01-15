@@ -1,29 +1,86 @@
+/* eslint-disable react/prop-types */
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { IoCloudUploadOutline } from "react-icons/io5";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import useBlogStore from "../../../Store/BlogStore";
+import showToast from "../../../Utils/ShowToast";
 
-function CreateBlog() {
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [image, setImage] = useState(null);
-
+// Separate ImageUploader Component
+function ImageUploader({ image, setImage }) {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setImage(reader.result);
-      };
-      reader.readAsDataURL(file);
+    if (file && ["image/jpeg", "image/png"].includes(file.type)) {
+      setImage(file);
+    } else {
+      showToast("Error", "Please upload a valid image (JPEG/PNG)", "error");
     }
   };
 
-  const handleSubmit = () => {
-    console.log("Title:", title);
-    console.log("Content:", content);
-    console.log("Image:", image);
-    // Add logic to save the blog
+  return (
+    <div className="space-y-2">
+      <label className="text-lg font-semibold">Upload Cover Image</label>
+      {image && (
+        <div className="mt-4">
+          <img
+            src={URL.createObjectURL(image)}
+            alt="Preview"
+            className="mt-2 w-full h-72 object-contain rounded-md border"
+          />
+        </div>
+      )}
+      <label
+        htmlFor="image"
+        className="btn bg-primary text-white lg:w-1/3 flex items-center justify-center gap-2 cursor-pointer"
+      >
+        <IoCloudUploadOutline /> Upload Image
+      </label>
+      <input
+        type="file"
+        id="image"
+        className="hidden"
+        onChange={handleImageChange}
+      />
+    </div>
+  );
+}
+
+// Main CreateBlog Component
+function CreateBlog() {
+  const { createBlog } = useBlogStore();
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [image, setImage] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
+  const handleSubmit = async () => {
+    if (!title || !content) {
+      showToast("Error", "Title and content are required", "error");
+      return;
+    }
+    setError(null);
+    setLoading(true);
+
+    try {
+      await createBlog({
+        title,
+        content,
+        image,
+      });
+      setTitle("");
+      setContent("");
+      setImage(null);
+      showToast("Success", "Blog created successfully!", "success");
+      navigate("/");
+    } catch (error) {
+      setError(error.message || "Failed to create blog");
+      showToast("Error", error.message || "Failed to create blog", "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -31,31 +88,9 @@ function CreateBlog() {
       <h1 className="text-3xl font-bold text-center text-primary">
         Create a Rich Blog
       </h1>
-      {/* Image Upload */}
-      <div className="space-y-2">
-        <label className="text-lg font-semibold">Upload Cover Image</label>
-        {image && (
-          <div className="mt-4">
-            <img
-              src={image}
-              alt="Preview"
-              className="mt-2 w-full h-60 object-fit rounded-md border"
-            />
-          </div>
-        )}
-        <label
-          htmlFor="image"
-          className="btn bg-primary text-white lg:w-1/3 flex items-center justify-center gap-2 cursor-pointer"
-        >
-          <IoCloudUploadOutline /> Upload Image
-        </label>
-        <input
-          type="file"
-          id="image"
-          className="hidden"
-          onChange={handleImageChange}
-        />
-      </div>
+
+      {/* Image Uploader */}
+      <ImageUploader image={image} setImage={setImage} />
 
       {/* Title Input */}
       <div className="space-y-2">
@@ -70,31 +105,26 @@ function CreateBlog() {
       </div>
 
       {/* Content Editor */}
-      <div className="">
+      <div className="space-y-2">
         <label className="text-lg font-semibold">Content</label>
         <ReactQuill
           theme="snow"
           value={content}
-          className="rounded-md shadow-sm focus:ring-2 focus:ring-primary focus:outline-none h-[500px]" // Adjust height here
+          className="rounded-md shadow-sm focus:ring-2 focus:ring-primary focus:outline-none h-[500px]"
           onChange={setContent}
           modules={{
             toolbar: [
-              // Headings and font settings
-              [{ header: [1, 2, 3, 4, 5, 6, false] }, { font: [] }],
-              // Text formatting
+              [{ header: [1, 2, 3, 4, 5, 6, false] }],
+              [{ font: ["serif", "monospace", "sans-serif"] }],
               ["bold", "italic", "underline", "strike"],
-              // Text color and background color
               [{ color: [] }, { background: [] }],
-              // Lists, bullet points, and indents
               [
                 { list: "ordered" },
                 { list: "bullet" },
                 { indent: "-1" },
                 { indent: "+1" },
               ],
-              // Alignment and blockquote
               [{ align: [] }, "blockquote", "code-block"],
-              // Clear formatting
               ["clean"],
             ],
           }}
@@ -113,18 +143,25 @@ function CreateBlog() {
             "align",
             "blockquote",
             "code-block",
-            "hr",
           ]}
         />
       </div>
+
+      {/* Error Message */}
+      {error && <p className="text-red-500 mt-4">{error}</p>}
 
       {/* Publish Button */}
       <div className="flex justify-end mt-20">
         <button
           onClick={handleSubmit}
-          className="bg-primary text-white py-3 px-6 rounded-md text-lg font-semibold shadow-md hover:bg-secondary transition-all duration-300"
+          disabled={loading}
+          className={`py-3 px-6 rounded-md text-lg font-semibold shadow-md transition-all duration-300 ${
+            loading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-primary text-white hover:bg-secondary"
+          }`}
         >
-          Publish Blog
+          {loading ? "Publishing..." : "Publish Blog"}
         </button>
       </div>
     </div>

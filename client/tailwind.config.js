@@ -9,9 +9,14 @@ export default {
       colors: {
         primary: '#F97316',
       },
+      fontFamily: {
+        serif: ['"Serif Font"', 'serif'],
+        monospace: ['"Monospace Font"', 'monospace'],
+      },
     },
   },
   plugins: [
+    require('@tailwindcss/typography'),
     require('daisyui'),
     function ({ addUtilities }) {
       addUtilities({

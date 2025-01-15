@@ -6,6 +6,7 @@ import useBlogStore from "../../../Store/BlogStore";
 import { useAuth } from "../../../Store/AuthStore";
 import Skeleton from "../../../Components/Skeleton";
 import UpdateBlogModal from "./UpdateBlogModal";
+import DOMPurify from "dompurify";
 
 function UpdateBlog() {
   const { blogs, deleteBlog, fetchBlogs, loading } = useBlogStore();
@@ -75,10 +76,25 @@ function UpdateBlog() {
                 <h2 className="card-title text-xl font-semibold mb-2">
                   {blog.title}
                 </h2>
-                <p className="text-sm mb-4">
-                  {blog.content.length > 200
-                    ? blog.content.slice(0, 200) + "......"
-                    : blog.content}
+                <p className="text-gray-600 text-sm mb-4 text-pre-wrap">
+                  {blog.content.length > 200 ? (
+                    <p className="text-gray-600 text-sm mb-4">
+                      <span
+                        dangerouslySetInnerHTML={{
+                          __html: DOMPurify.sanitize(
+                            blog.content.slice(0, 200)
+                          ),
+                        }}
+                      />
+                    </p>
+                  ) : (
+                    <p
+                      className="text-gray-600 text-sm mb-4"
+                      dangerouslySetInnerHTML={{
+                        __html: DOMPurify.sanitize(blog.content),
+                      }}
+                    />
+                  )}
                 </p>
                 <div className="flex mt-4 space-x-4">
                   <button

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useTeamStore } from "../../../Store/TeamStore";
 import { Link, useLocation } from "react-router-dom";
+import DOMPurify from "dompurify";
 
 function User() {
   const { isLoading, error, getProfile, userProfile } = useTeamStore();
@@ -105,47 +106,61 @@ function User() {
       </h1>
       {userProfile?.author?.length > 0 ? (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 mt-8">
-          {userProfile.author.map((blog) => (
-            <div
-              key={blog._id}
-              className="card bg-white shadow-md hover:shadow-lg transition-shadow duration-300 rounded-lg overflow-hidden"
-            >
-              <figure className="relative h-40 w-full overflow-hidden">
-                <img
-                  src={
-                    blog.image
-                      ? `${
-                          import.meta.env.VITE_BACKEND_URL
-                        }/${blog.image.replace(/^src\//, "")}`
-                      : "/default-profile.png"
-                  }
-                  alt={blog.title}
-                  className="h-full w-full object-cover transition-transform duration-500 hover:scale-110"
-                />
-              </figure>
-              <div className="card-body p-4">
-                <h2 className="card-title text-xl font-semibold text-gray-800 mb-2">
-                  {blog.title}
-                </h2>
-                <p className="text-gray-600 text-sm mb-4">
-                  {blog.content.length > 200 ? (
-                    <>
-                      {blog.content.slice(0, 200)}{" "}
-                      <Link
-                        to={"/blog-data"}
-                        state={{ blogId: blog._id }}
-                        className="text-indigo-500 hover:text-indigo-700 text-sm font-medium"
-                      >
-                        ... Read More →
-                      </Link>
-                    </>
-                  ) : (
-                    blog.content
-                  )}
-                </p>
+          {userProfile.author
+            .slice() // Create a shallow copy to avoid mutating the original array
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // Sort by createdAt (latest first)
+            .map((blog) => (
+              <div
+                key={blog._id}
+                className="card bg-white shadow-md hover:shadow-lg transition-shadow duration-300 rounded-lg overflow-hidden"
+              >
+                <figure className="relative h-40 w-full overflow-hidden">
+                  <img
+                    src={
+                      blog.image
+                        ? `${
+                            import.meta.env.VITE_BACKEND_URL
+                          }/${blog.image.replace(/^src\//, "")}`
+                        : "/default-profile.png"
+                    }
+                    alt={blog.title}
+                    className="h-full w-full object-none transition-transform duration-500 hover:scale-110"
+                  />
+                </figure>
+                <div className="card-body p-4">
+                  <h2 className="card-title text-xl font-semibold text-gray-800 mb-2">
+                    {blog.title}
+                  </h2>
+                  <p className="text-gray-600 text-sm mb-4 text-pre-wrap">
+                    {blog.content.length > 200 ? (
+                      <p className="text-gray-600 text-sm mb-4">
+                        <span
+                          dangerouslySetInnerHTML={{
+                            __html: DOMPurify.sanitize(
+                              blog.content.slice(0, 200)
+                            ),
+                          }}
+                        />
+                        <Link
+                          to="/blog-data"
+                          state={{ blogId: blog._id }}
+                          className="text-indigo-500 hover:text-indigo-700 text-sm font-medium"
+                        >
+                          ... Read More →
+                        </Link>
+                      </p>
+                    ) : (
+                      <p
+                        className="text-gray-600 text-sm mb-4"
+                        dangerouslySetInnerHTML={{
+                          __html: DOMPurify.sanitize(blog.content),
+                        }}
+                      />
+                    )}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
       ) : (
         <p className="text-center text-gray-500 mt-4">

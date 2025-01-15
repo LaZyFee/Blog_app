@@ -1,5 +1,3 @@
-/* eslint-disable */
-import { useEffect } from "react";
 import Blog from "../Blog/Blog";
 import Banner from "./Banner";
 import CreatePost from "./CreatePost";
@@ -15,11 +13,15 @@ function Home() {
       <div data-aos="fade-up">
         <Banner />
       </div>
-      <div className="flex flex-col md:flex-row justify-between gap-4">
+      <div data-aos="fade-up">
+        <CreatePost />
+      </div>
+      <div className="flex flex-col md:flex-row justify-between gap-8 relative">
         <div data-aos="fade-left">
+          {/* Blog Component */}
           <Blog />
         </div>
-        <div data-aos="fade-right">
+        <div data-aos="fade-right" className="sticky top-5 h-max">
           <RightCol />
         </div>
       </div>

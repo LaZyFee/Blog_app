@@ -167,7 +167,7 @@ function CommentSection({ blogId }) {
   if (commentsError) return <p>{commentsError}</p>;
 
   return (
-    <div className="mt-8">
+    <div className="mt-8 max-w-4xl mx-auto p-6">
       {user ? (
         <div className="flex items-center max-w-2xl">
           <img
@@ -193,8 +193,8 @@ function CommentSection({ blogId }) {
             disabled={!commentInput.trim()} // Disable if input is empty
             className={`ml-4 px-4 py-2 rounded ${
               commentInput.trim()
-                ? "bg-blue-500 text-white hover:bg-blue-600"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                ? "bg-primary text-white hover:bg-blue-600"
+                : "bg-primary/50 text-gray-500 cursor-not-allowed"
             }`}
           >
             Post
@@ -212,7 +212,7 @@ function CommentSection({ blogId }) {
 
       <div className="mt-8">
         {comments.slice(0, commentsToShow).map((comment) => (
-          <div key={comment._id} className="rounded-lg mb-6 border p-4">
+          <div key={comment._id} className="rounded-lg mb-6  p-4">
             <div className="flex">
               <img
                 src={

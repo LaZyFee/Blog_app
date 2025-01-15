@@ -3,6 +3,7 @@ import Navbar from "../Components/Navbar/Navbar";
 import { useEffect, useState } from "react";
 import Footer from "../Components/Footer/Footer";
 import { FaAngleDoubleUp } from "react-icons/fa";
+import ScrollToTop from "../Utils/ScrollToTop";
 
 function Main() {
   const [marginTop, setMarginTop] = useState(false);
@@ -38,6 +39,7 @@ function Main() {
         style={{ marginTop: marginTop ? "100px" : "0" }}
         className="transition-all duration-300 min-h-screen"
       >
+        <ScrollToTop />
         <Outlet />
         {showScrollButton && (
           <div

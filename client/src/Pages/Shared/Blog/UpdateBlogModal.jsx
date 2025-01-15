@@ -3,6 +3,8 @@ import { useState } from "react";
 import { IoCloudUploadOutline, IoTrashOutline } from "react-icons/io5";
 import useBlogStore from "../../../Store/BlogStore";
 import showToast from "../../../Utils/ShowToast";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 function UpdateBlogModal({ onClose, data }) {
   const { updateBlog, fetchBlogs } = useBlogStore();
@@ -21,7 +23,9 @@ function UpdateBlogModal({ onClose, data }) {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-
+  const handleContentChange = (value) => {
+    setFormData((prev) => ({ ...prev, content: value }));
+  };
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -70,8 +74,14 @@ function UpdateBlogModal({ onClose, data }) {
   };
 
   return (
-    <div className="modal modal-open">
-      <div className="modal-box">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      <div className="w-full h-full max-w-7xl bg-white rounded-lg shadow-lg overflow-y-auto p-6 relative">
+        <button
+          className="absolute top-4 right-4 bg-red-500 text-white rounded-full p-2 hover:bg-red-600"
+          onClick={onClose}
+        >
+          Close
+        </button>
         <form onSubmit={handleUpdate}>
           <div className="flex flex-col gap-4">
             <label className="text-gray-700 font-semibold">Current Image</label>
@@ -81,12 +91,13 @@ function UpdateBlogModal({ onClose, data }) {
                   /^src\//,
                   ""
                 )}`}
-                className="w-full h-60 object-cover rounded-lg"
+                className="w-full h-60 object-contain rounded-lg"
                 alt={data.name || "Current Image"}
               />
             ) : (
               <p className="text-gray-500 italic">No image selected.</p>
             )}
+            {/* Title */}
             <label className="font-semibold text-gray-700">Title</label>
             <input
               type="text"
@@ -94,21 +105,38 @@ function UpdateBlogModal({ onClose, data }) {
               value={formData.title}
               onChange={handleInputChange}
               className="input input-bordered w-full"
+              placeholder="Enter blog title"
               required
             />
 
+            {/* Content */}
             <label className="font-semibold text-gray-700">Content</label>
-            <textarea
-              name="content"
+            <ReactQuill
+              theme="snow"
               value={formData.content}
-              onChange={handleInputChange}
-              className="textarea textarea-bordered w-full"
-              rows="4"
-              required
+              onChange={handleContentChange}
+              className="rounded-md shadow-sm focus:ring-2 focus:ring-primary focus:outline-none h-[300px]"
+              modules={{
+                toolbar: [
+                  [{ header: [1, 2, 3, false] }],
+                  ["bold", "italic", "underline"],
+                  [{ list: "ordered" }, { list: "bullet" }],
+                  ["link"],
+                ],
+              }}
+              formats={[
+                "header",
+                "bold",
+                "italic",
+                "underline",
+                "list",
+                "bullet",
+                "link",
+              ]}
             />
 
             {/* Image Upload and Preview */}
-            <div className="flex flex-col gap-4 mt-5">
+            <div className="flex flex-col gap-4 mt-14 lg:mt-10">
               <label className="text-gray-700 font-semibold">Image</label>
               {imagePreview ? (
                 <div className="relative">
@@ -151,7 +179,7 @@ function UpdateBlogModal({ onClose, data }) {
                   onChange={handleRemoveImage}
                 />
                 <span className="text-gray-700 font-semibold">
-                  Remove Image
+                  Remove Current Image
                 </span>
               </label>
             </div>

@@ -5,13 +5,12 @@ import { Link, useLocation } from "react-router-dom";
 import { IoMdTime } from "react-icons/io";
 import { formatDate } from "../../../Utils/formatedate";
 import CommentSection from "./CommentSection";
+import DOMPurify from "dompurify";
 
 function DetailsBlog() {
   const location = useLocation();
   const { blogId } = location.state || {};
   const { blog, fetchBlogById, loading, error: blogError } = useBlogStore();
-
-  //   console.log(blog);
 
   useEffect(() => {
     if (blogId) fetchBlogById(blogId);
@@ -20,6 +19,14 @@ function DetailsBlog() {
   if (loading) return <Skeleton />;
   if (blogError) return <p className="text-red-500">{blogError}</p>;
   if (!blog) return <p className="text-gray-500">Blog not found</p>;
+
+  // Ensure Tailwind styles are applied to the rich text content
+  const renderContent = (content) => {
+    return DOMPurify.sanitize(content, {
+      ADD_TAGS: ["blockquote", "pre", "h2", "h3", "span"],
+      ADD_ATTR: ["class", "style"],
+    });
+  };
 
   return (
     <>
@@ -73,9 +80,10 @@ function DetailsBlog() {
         </div>
 
         {/* Blog Content */}
-        <div className="mt-6 text-gray-800 leading-relaxed space-y-4">
-          <p className="text-pre-wrap">{blog.content}</p>
-        </div>
+        <div
+          className="mt-6 text-justify"
+          dangerouslySetInnerHTML={{ __html: renderContent(blog.content) }}
+        />
       </div>
       <div className="divider">
         <h2 className="text-2xl font-bold mb-4 text-primary">Comments</h2>

@@ -5,7 +5,10 @@ import { Link } from "react-router-dom";
 import Skeleton from "../../../Components/Skeleton";
 import { formatDate } from "../../../Utils/formatedate";
 import UserReact from "../../../Utils/UserReact";
-
+import DOMPurify from "dompurify";
+import { GoComment } from "react-icons/go";
+import { FiShare2 } from "react-icons/fi";
+import { FaRegBookmark } from "react-icons/fa";
 function Blog() {
   const { blogs, fetchBlogs, loading, error, toggleLike } = useBlogStore();
 
@@ -13,15 +16,16 @@ function Blog() {
     fetchBlogs();
   }, [fetchBlogs]);
 
+  const sortedBlogs = blogs.sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  );
   // Truncate long descriptions
-  const truncateDescription = (description, maxLength = 500) => {
+  const truncateDescription = (description, maxLength = 100) => {
     if (description.length > maxLength) {
-      return (
-        <>
-          {description.slice(0, maxLength)}
-          <span className="text-primary font-semibold">... read more</span>
-        </>
-      );
+      return `${description.slice(
+        0,
+        maxLength
+      )}<span style="color: var(--primary); font-weight: 600;">.....read more</span>`;
     }
     return description;
   };
@@ -31,86 +35,100 @@ function Blog() {
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-      {blogs
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-        .map((blog) => (
-          <div
-            key={blog._id}
-            className="p-4 transition-all duration-500 hover:shadow-xl"
-            data-aos="fade-up"
-          >
-            <div className="overflow-hidden">
+      {sortedBlogs.map((blog) => (
+        <div
+          key={blog._id}
+          className="p-6 rounded-lg transition-transform duration-300 hover:shadow-xl hover:-translate-y-2"
+          data-aos="fade-up"
+        >
+          {/* Image Section */}
+          <div className="overflow-hidden rounded-lg">
+            <img
+              src={
+                blog.image
+                  ? `${import.meta.env.VITE_BACKEND_URL}/${blog.image.replace(
+                      /^src\//,
+                      ""
+                    )}`
+                  : "/default-profile.png"
+              }
+              alt={blog.title}
+              loading="lazy"
+              className="h-[250px] w-full object-cover transition-transform duration-500 hover:scale-110"
+            />
+          </div>
+
+          {/* Metadata Section */}
+          <div className="flex justify-between items-center pt-4 text-gray-600">
+            <p className="flex items-center gap-2 text-sm">
+              <IoMdTime className="text-gray-400" />{" "}
+              {formatDate(blog.createdAt)}
+            </p>
+            <Link
+              to="/user"
+              state={{ userId: blog.createdBy?._id }}
+              className="flex items-center gap-2 text-sm font-medium hover:text-blue-500"
+            >
               <img
                 src={
-                  blog.image
-                    ? `${import.meta.env.VITE_BACKEND_URL}/${blog.image.replace(
-                        /^src\//,
-                        ""
-                      )}`
+                  blog.createdBy?.profilepic
+                    ? `${
+                        import.meta.env.VITE_BACKEND_URL
+                      }/${blog.createdBy.profilepic.replace(/^src\//, "")}`
                     : "/default-profile.png"
                 }
-                alt={blog.title}
-                className="mx-auto h-[250px] w-full rounded-xl object-cover transition duration-700 hover:skew-x-2 hover:scale-110"
+                alt={blog.createdBy?.name || "Unknown Author"}
+                className="w-8 h-8 rounded-full border border-gray-300"
               />
-            </div>
-            <div className="flex justify-between pt-2 text-slate-600">
-              <p className="flex items-center">
-                <IoMdTime /> {formatDate(blog.createdAt)}
-              </p>
-              <Link
-                to="/user"
-                state={{ userId: blog.createdBy?._id }}
-                className="hover:font-bold hover:text-blue-500"
-              >
-                <p className="line-clamp-1 flex items-center">
-                  <img
-                    src={
-                      blog.createdBy?.profilepic
-                        ? `${
-                            import.meta.env.VITE_BACKEND_URL
-                          }/${blog.createdBy.profilepic.replace(/^src\//, "")}`
-                        : "/default-profile.png"
-                    }
-                    alt={blog.createdBy?.name || "Unknown Author"}
-                    className="w-6 h-6 rounded-full mr-2"
-                  />
-                  {blog.createdBy?.name
-                    ? blog.createdBy.name.split(" ").slice(-1).join(" ")
-                    : "Unknown Author"}
-                </p>
-              </Link>
-            </div>
-            <Link to={"/blog-data"} state={{ blogId: blog._id }}>
-              <div className="space-y-3 py-3 min-h-[200px] ">
-                <h2 className="text-lg font-bold text-primary mb-2">
-                  {blog.title}
-                </h2>
-                <p className="text-sm text-pre-wrap">
-                  {truncateDescription(blog.content)}
-                </p>
-              </div>
+              {blog.createdBy?.name
+                ? blog.createdBy.name.split(" ").slice(-1).join(" ")
+                : "Unknown Author"}
             </Link>
-            <div className="divider"></div>
-            <div className="flex justify-between items-center mt-4">
-              {/* Pass the UserReact component */}
-              <UserReact
-                id={blog._id}
-                likes={blog.likes}
-                dislikes={blog.disLikes}
-                reactions={blog.reactions}
-                toggleLike={toggleLike}
-              />
+          </div>
 
+          {/* Content Section */}
+          <Link to={"/blog-data"} state={{ blogId: blog._id }}>
+            <div className="space-y-3 py-3">
+              <h2 className="text-lg font-semibold text-primary">
+                {blog.title}
+              </h2>
+              <p
+                className="text-sm leading-relaxed"
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(truncateDescription(blog.content)),
+                }}
+              />
+            </div>
+          </Link>
+
+          {/* Divider */}
+          <div className="border-t my-4"></div>
+
+          {/* Actions Section */}
+          <div className="flex justify-between items-center">
+            <UserReact
+              id={blog._id}
+              likes={blog.likes}
+              dislikes={blog.disLikes}
+              reactions={blog.reactions}
+              toggleLike={toggleLike}
+            />
+
+            <div className="flex items-center gap-4 text-gray-500">
               <Link to={"/blog-data"} state={{ blogId: blog._id }}>
                 <div className="flex items-center gap-1">
+                  <GoComment className="text-lg cursor-pointer hover:text-blue-500" />
                   <span className="text-sm text-gray-600">
                     ({blog.commentsCount || 0})
                   </span>
                 </div>
               </Link>
+              <FiShare2 className="text-lg cursor-pointer hover:text-blue-500" />
+              <FaRegBookmark className="text-lg cursor-pointer hover:text-blue-500" />
             </div>
           </div>
-        ))}
+        </div>
+      ))}
     </div>
   );
 }
