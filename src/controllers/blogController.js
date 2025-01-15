@@ -25,7 +25,8 @@ export const CreateBlog = async (req, res) => {
         }
 
         // Handle blog picture path
-        const blogPicPath = req.file ? req.file.path.replace(/\\/g, "/") : "";
+        // const blogPicPath = req.file ? req.file.path.replace(/\\/g, "/") : "";
+        const blogPicPath = req.file ? req.file.path : "";
 
         // Create a new blog
         const newBlog = await BlogModel.create({
@@ -59,7 +60,7 @@ export const CreateBlog = async (req, res) => {
 export const UpdateBlog = async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, content, removeImage } = req.body; // Include removeImage in the destructure
+        const { title, content, removeImage } = req.body;
 
         // Fetch the existing blog by ID
         const existingBlog = await BlogModel.findById(id);
@@ -83,7 +84,7 @@ export const UpdateBlog = async (req, res) => {
         } else if (req.file) {
             // Handle image upload
             deleteImage(existingBlog.image); // Delete the old image if a new one is uploaded
-            updateFields.image = req.file.path.replace(/\\/g, "/"); // Normalize file path
+            updateFields.image = req.file.path; // Normalize file path
         }
 
         // Update the blog document

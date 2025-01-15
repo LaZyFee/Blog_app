@@ -1,66 +1,11 @@
-import fs from 'fs';
-import path from 'path';
-import multer from 'multer';
-// Storage engine for profile pictures
-const profilePicStorage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, "src/uploads/profile-pics/");
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + path.extname(file.originalname));
-    }
-});
+import multer from "multer";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
+import cloudinary from "../utilities/cloudinary.js";
 
-// Storage engine for blog pictures
-const blogPicStorage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const dir = "src/uploads/blog-pics/";
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir, { recursive: true }); // Create the directory if it doesn't exist
-        }
-        cb(null, dir);
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + path.extname(file.originalname));
-    }
-});
-// Storage engine for service pictures
-const TeamPicStorage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const dir = "src/uploads/team-pics/";
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir, { recursive: true }); // Create the directory if it doesn't exist
-        }
-        cb(null, dir);
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + path.extname(file.originalname));
-    }
-});
-// Storage engine for service pictures
-const servicePicStorage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const dir = "src/uploads/service-pics/";
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir, { recursive: true }); // Create the directory if it doesn't exist
-        }
-        cb(null, dir);
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + path.extname(file.originalname));
-    }
-});
-
-
-
-// File filter (common for both profile and blog images)
+// Common file filter for image uploads
 const fileFilter = (req, file, cb) => {
     const filetypes = /jpeg|jpg|png/;
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    const extname = filetypes.test(file.originalname.toLowerCase());
     const mimetype = filetypes.test(file.mimetype);
 
     if (mimetype && extname) {
@@ -70,27 +15,72 @@ const fileFilter = (req, file, cb) => {
     }
 };
 
-// Upload for profile pictures
-export const uploadProfilePic = multer({
-    storage: profilePicStorage,
-    limits: { fileSize: 1024 * 1024 * 5 }, // Limit file size to 5MB
-    fileFilter: fileFilter
+// Cloudinary storage for profile pictures
+const profilePicStorage = new CloudinaryStorage({
+    cloudinary,
+    params: {
+        folder: "profile-pics", // Folder name in Cloudinary
+        allowed_formats: ["jpeg", "jpg", "png"],
+        transformation: [
+            { width: 500, height: 500, crop: "limit", quality: "auto" },
+        ],
+        public_id: (req, file) => `profile_${Date.now()}_${file.originalname}`, // Optional custom public ID
+    },
 });
 
-// Upload for blog pictures
+// Cloudinary storage for blog pictures
+const blogPicStorage = new CloudinaryStorage({
+    cloudinary,
+    params: {
+        folder: "blog-pics",
+        allowed_formats: ["jpeg", "jpg", "png"],
+        public_id: (req, file) => `blog_${Date.now()}_${file.originalname}`,
+    },
+});
+
+// Cloudinary storage for service pictures
+const servicePicStorage = new CloudinaryStorage({
+    cloudinary,
+    params: {
+        folder: "service-pics",
+        allowed_formats: ["jpeg", "jpg", "png"],
+        public_id: (req, file) => `service_${Date.now()}_${file.originalname}`,
+    },
+});
+// Cloudinary storage for team member pictures
+const teamMemberPicStorage = new CloudinaryStorage({
+    cloudinary,
+    params: {
+        folder: "team-member-pics",
+        allowed_formats: ["jpeg", "jpg", "png"],
+        transformation: [
+            { width: 500, height: 500, crop: "limit", quality: "auto" },
+        ],
+        public_id: (req, file) => `team_member_${Date.now()}_${file.originalname}`,
+    },
+});
+
+// Multer upload middleware
+export const uploadProfilePic = multer({
+    storage: profilePicStorage,
+    fileFilter,
+    limits: { fileSize: 1024 * 1024 * 5 }, // Limit file size to 5MB
+});
+
 export const uploadBlogPic = multer({
     storage: blogPicStorage,
+    fileFilter,
     limits: { fileSize: 1024 * 1024 * 5 }, // Limit file size to 5MB
-    fileFilter: fileFilter
 });
-// Upload for service pictures
+
 export const uploadServicePic = multer({
     storage: servicePicStorage,
+    fileFilter,
     limits: { fileSize: 1024 * 1024 * 5 }, // Limit file size to 5MB
-    fileFilter: fileFilter
 });
+
 export const uploadTeamMemberPic = multer({
-    storage: TeamPicStorage,
+    storage: teamMemberPicStorage,
+    fileFilter,
     limits: { fileSize: 1024 * 1024 * 5 }, // Limit file size to 5MB
-    fileFilter: fileFilter
 });

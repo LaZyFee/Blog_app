@@ -21,7 +21,9 @@ export const Register = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Upload profile picture
-        const profilePicPath = req.file ? req.file.path.replace(/\\/g, "/") : "";
+        // const profilePicPath = req.file ? req.file.path.replace(/\\/g, "/") : "";
+        // Cloudinary URL
+        const profilePicUrl = req.file ? req.file.path : "";
 
         // const profilePicPath = req.file ? `uploads/profile-pics/${req.file.filename}` : "";
 
@@ -30,7 +32,7 @@ export const Register = async (req, res) => {
             name,
             email,
             password: hashedPassword,
-            profilepic: profilePicPath
+            profilepic: profilePicUrl,
         })
         // Generate JWT token
         const token = generateToken(user);

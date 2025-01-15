@@ -11,7 +11,8 @@ export const CreateTeam = async (req, res) => {
         }
 
         // Handle image path if provided
-        const imagePath = req.file ? req.file.path.replace(/\\/g, "/") : "";
+        // const imagePath = req.file ? req.file.path.replace(/\\/g, "/") : "";
+        const imagePath = req.file ? req.file.path : "";
 
         const { user_id } = req.headers;
 
@@ -38,7 +39,7 @@ export const CreateTeam = async (req, res) => {
 export const UpdateTeam = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, role, removeImage } = req.body; // Include removeImage in the destructure
+        const { name, role, removeImage } = req.body;
 
         const teamMember = await TeamModel.findById(id);
         if (!teamMember) {
@@ -56,7 +57,8 @@ export const UpdateTeam = async (req, res) => {
         } else if (req.file) {
             // Update with new image if provided
             deleteImage(teamMember.image);
-            teamMember.image = req.file.path.replace(/\\/g, "/");
+            // teamMember.image = req.file.path.replace(/\\/g, "/");
+            teamMember.image = req.file.path;
         }
 
         await teamMember.save();
