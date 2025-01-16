@@ -1,21 +1,27 @@
+import React from "react";
 import { createBrowserRouter } from "react-router-dom";
 import Main from "../Layouts/Main";
-import About from "../Pages/Shared/About/About";
-import Blog from "../Pages/Shared/Blog/Blog";
-import Contact from "../Pages/Shared/Contact/Contact";
-import Signup from "../Pages/Authentication/Signup/Signup";
-import Login from "../Pages/Authentication/Login/Login";
-import Home from "../Pages/Shared/Home/Home";
-import Service from "../Pages/Shared/Service/Service";
-import NotFound from "../Pages/Shared/NotFound/NotFound";
-import Profile from "../Pages/Shared/Profile/Profile";
 import ProfileLayout from "../Layouts/ProfileLayout";
-import CreateTeam from "../Pages/Shared/Team/CreateTeam";
-import UpdateBlog from "../Pages/Shared/Blog/UpdateBlog";
-import UpdateTeam from "../Pages/Shared/Team/UpdateTeam";
-import User from "../Pages/Shared/User/User";
-import DetailsBlog from "../Pages/Shared/Blog/DetailsBlog";
-import CreateBlog from "../Pages/Shared/Blog/CreateBlog";
+
+const Home = React.lazy(() => import("../Pages/Shared/Home/Home"));
+const About = React.lazy(() => import("../Pages/Shared/About/About"));
+const Blog = React.lazy(() => import("../Pages/Shared/Blog/Blog"));
+const Service = React.lazy(() => import("../Pages/Shared/Service/Service"));
+const Contact = React.lazy(() => import("../Pages/Shared/Contact/Contact"));
+const User = React.lazy(() => import("../Pages/Shared/User/User"));
+const DetailsBlog = React.lazy(() =>
+  import("../Pages/Shared/Blog/DetailsBlog")
+);
+const CreateBlog = React.lazy(() => import("../Pages/Shared/Blog/CreateBlog"));
+const Profile = React.lazy(() => import("../Pages/Shared/Profile/Profile"));
+const UpdateBlog = React.lazy(() => import("../Pages/Shared/Blog/UpdateBlog"));
+const CreateTeam = React.lazy(() => import("../Pages/Shared/Team/CreateTeam"));
+const UpdateTeam = React.lazy(() => import("../Pages/Shared/Team/UpdateTeam"));
+const Login = React.lazy(() => import("../Pages/Authentication/Login/Login"));
+const Signup = React.lazy(() =>
+  import("../Pages/Authentication/Signup/Signup")
+);
+const NotFound = React.lazy(() => import("../Pages/Shared/NotFound/NotFound"));
 
 export const router = createBrowserRouter([
   {
@@ -30,7 +36,6 @@ export const router = createBrowserRouter([
       { path: "/user", element: <User /> },
       { path: "/blog-data", element: <DetailsBlog /> },
       { path: "/create-blog", element: <CreateBlog /> },
-
       {
         path: "/profile",
         element: <ProfileLayout />,

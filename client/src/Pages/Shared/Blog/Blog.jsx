@@ -16,9 +16,10 @@ function Blog() {
     fetchBlogs();
   }, [fetchBlogs]);
 
-  const sortedBlogs = blogs.sort(
+  const sortedBlogs = [...(blogs || [])].sort(
     (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
   );
+
   // Truncate long descriptions
   const truncateDescription = (description, maxLength = 300) => {
     if (description.length > maxLength) {
@@ -95,9 +96,9 @@ function Blog() {
           <div className="flex justify-between items-center">
             <UserReact
               id={blog._id}
-              likes={blog.likes}
-              dislikes={blog.disLikes}
-              reactions={blog.reactions}
+              likes={Array.isArray(blog.likes) ? blog.likes : []} // Ensure likes is an array
+              dislikes={Array.isArray(blog.disLikes) ? blog.disLikes : []} // Ensure disLikes is an array
+              reactions={Array.isArray(blog.reactions) ? blog.reactions : []} // Ensure reactions is an array
               toggleLike={toggleLike}
             />
 
