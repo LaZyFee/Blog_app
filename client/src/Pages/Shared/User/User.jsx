@@ -42,13 +42,7 @@ function User() {
       <div className="card card-side bg-gradient-to-r from-blue-100 to-indigo-200 p-6 rounded-lg flex items-center">
         <figure className="flex-shrink-0">
           <img
-            src={
-              userProfile.profilepic
-                ? `${
-                    import.meta.env.VITE_BACKEND_URL
-                  }/${userProfile.profilepic.replace(/^src\//, "")}`
-                : "/default-profile.png"
-            }
+            src={userProfile.profilepic}
             className="rounded-full w-36 h-36 md:w-48 md:h-48 border-4 border-indigo-300 shadow-lg"
             alt={userProfile.name || "User profile"}
           />
@@ -73,16 +67,7 @@ function User() {
             {userProfile.team.map((member) => (
               <div key={member._id} className="card image-full shadow-xl">
                 <figure>
-                  <img
-                    src={
-                      member.image
-                        ? `${
-                            import.meta.env.VITE_BACKEND_URL
-                          }/${member.image.replace(/^src\//, "")}`
-                        : "/default-profile.png"
-                    }
-                    alt={member.name || "Team Member"}
-                  />
+                  <img src={member.image} alt={member.name || "Team Member"} />
                 </figure>
                 <div className="card-body">
                   <h2 className="card-title text-2xl font-bold text-primary">
@@ -116,13 +101,7 @@ function User() {
               >
                 <figure className="relative h-40 w-full overflow-hidden">
                   <img
-                    src={
-                      blog.image
-                        ? `${
-                            import.meta.env.VITE_BACKEND_URL
-                          }/${blog.image.replace(/^src\//, "")}`
-                        : "/default-profile.png"
-                    }
+                    src={blog.image}
                     alt={blog.title}
                     className="h-full w-full object-none transition-transform duration-500 hover:scale-110"
                   />

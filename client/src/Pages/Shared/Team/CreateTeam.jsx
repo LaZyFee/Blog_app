@@ -1,8 +1,11 @@
+/* eslint-disable no-unused-vars */
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { IoCloudUploadOutline, IoTrashOutline } from "react-icons/io5";
+import { IoTrashOutline } from "react-icons/io5";
 import Swal from "sweetalert2";
 import { useTeamStore } from "../../../Store/TeamStore";
+import { UploadButton } from "../../../Utils/UploadButton";
+import showToast from "../../../Utils/ShowToast";
 
 function CreateTeam() {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -28,14 +31,7 @@ function CreateTeam() {
 
     try {
       await createTeamMember(formData);
-      Swal.fire({
-        icon: "success",
-        title: "Team member added successfully!",
-        showConfirmButton: false,
-        timer: 2000,
-        toast: true,
-        position: "top-right",
-      });
+      showToast("Success", "Team member added successfully!", "success");
       reset();
       setSelectedImage(null);
       setImagePreview(null);
@@ -68,8 +64,27 @@ function CreateTeam() {
       </h1>
       <form onSubmit={handleSubmit(onSubmit)} className="my-4 w-full">
         <div className="flex flex-col lg:flex-row gap-5 bg-base-200 p-5 rounded-lg min-h-72 mx-5 md:mx-10">
-          <div className="w-full  flex flex-col gap-4">
-            <label htmlFor="name" className=" -content font-semibold">
+          <div className="w-full flex flex-col gap-4">
+            {imagePreview && (
+              <div className="relative mt-4">
+                <label className=" -content font-semibold">
+                  Team Member Image
+                </label>
+                <img
+                  src={imagePreview}
+                  alt="Selected"
+                  className="w-full h-64 object-contain rounded-lg"
+                />
+                <button
+                  type="button"
+                  className="absolute top-2 right-2 bg-orange-500 text-white p-2 rounded-full hover:bg-red-600"
+                  onClick={handleRemoveImage}
+                >
+                  <IoTrashOutline className="text-xl" />
+                </button>
+              </div>
+            )}
+            <label htmlFor="name" className="font-semibold">
               Team Member Name
             </label>
             <input
@@ -85,7 +100,7 @@ function CreateTeam() {
               <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
             )}
 
-            <label htmlFor="role" className=" -content font-semibold">
+            <label htmlFor="role" className="font-semibold">
               Member Role
             </label>
             <input
@@ -101,38 +116,7 @@ function CreateTeam() {
               <p className="text-red-500 text-sm mt-1">{errors.role.message}</p>
             )}
 
-            <label className=" -content font-semibold">Team Member Image</label>
-
-            <label
-              htmlFor="image"
-              className="btn bg-orange-500 text-white lg:w-1/2 flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <IoCloudUploadOutline /> Upload Image
-            </label>
-
-            <input
-              type="file"
-              id="image"
-              className="hidden"
-              onChange={handleImageChange}
-            />
-
-            {imagePreview && (
-              <div className="relative mt-4">
-                <img
-                  src={imagePreview}
-                  alt="Selected"
-                  className="w-96 h-64 object-cover rounded-lg"
-                />
-                <button
-                  type="button"
-                  className="absolute top-2 right-2 bg-orange-500 text-white p-2 rounded-full hover:bg-red-600"
-                  onClick={handleRemoveImage}
-                >
-                  <IoTrashOutline className="text-xl" />
-                </button>
-              </div>
-            )}
+            <UploadButton params={handleImageChange} />
           </div>
         </div>
 

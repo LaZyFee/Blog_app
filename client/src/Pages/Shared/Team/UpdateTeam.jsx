@@ -73,13 +73,7 @@ function UpdateTeam() {
                 {/* Member Image */}
                 <figure className="flex-shrink-0">
                   <img
-                    src={
-                      member.image
-                        ? `${
-                            import.meta.env.VITE_BACKEND_URL
-                          }/${member.image.replace(/^src\//, "")}`
-                        : "/default-profile.png"
-                    }
+                    src={member.image}
                     alt={member.name || "Team Member"}
                     className="rounded-full w-36 h-36 border-4 border-indigo-300 shadow-lg"
                   />

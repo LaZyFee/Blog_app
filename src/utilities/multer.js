@@ -4,7 +4,7 @@ import cloudinary from "../utilities/cloudinary.js";
 
 // Common file filter for image uploads
 const fileFilter = (req, file, cb) => {
-    const filetypes = /jpeg|jpg|png/;
+    const filetypes = /jpeg|jpg|png|webp/;
     const extname = filetypes.test(file.originalname.toLowerCase());
     const mimetype = filetypes.test(file.mimetype);
 
@@ -20,7 +20,7 @@ const profilePicStorage = new CloudinaryStorage({
     cloudinary,
     params: {
         folder: "profile-pics", // Folder name in Cloudinary
-        allowed_formats: ["jpeg", "jpg", "png"],
+        allowed_formats: ["jpeg", "jpg", "png", "webp"],
         transformation: [
             { width: 500, height: 500, crop: "limit", quality: "auto" },
         ],
@@ -33,7 +33,7 @@ const blogPicStorage = new CloudinaryStorage({
     cloudinary,
     params: {
         folder: "blog-pics",
-        allowed_formats: ["jpeg", "jpg", "png"],
+        allowed_formats: ["jpeg", "jpg", "png", "webp"],
         public_id: (req, file) => `blog_${Date.now()}_${file.originalname}`,
     },
 });
@@ -43,7 +43,7 @@ const servicePicStorage = new CloudinaryStorage({
     cloudinary,
     params: {
         folder: "service-pics",
-        allowed_formats: ["jpeg", "jpg", "png"],
+        allowed_formats: ["jpeg", "jpg", "png", "webp"],
         public_id: (req, file) => `service_${Date.now()}_${file.originalname}`,
     },
 });
@@ -52,7 +52,7 @@ const teamMemberPicStorage = new CloudinaryStorage({
     cloudinary,
     params: {
         folder: "team-member-pics",
-        allowed_formats: ["jpeg", "jpg", "png"],
+        allowed_formats: ["jpeg", "jpg", "png", "webp"],
         transformation: [
             { width: 500, height: 500, crop: "limit", quality: "auto" },
         ],

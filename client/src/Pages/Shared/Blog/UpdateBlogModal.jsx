@@ -5,6 +5,7 @@ import useBlogStore from "../../../Store/BlogStore";
 import showToast from "../../../Utils/ShowToast";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import { UploadButton } from "../../../Utils/UploadButton";
 
 function UpdateBlogModal({ onClose, data }) {
   const { updateBlog, fetchBlogs } = useBlogStore();
@@ -87,10 +88,7 @@ function UpdateBlogModal({ onClose, data }) {
             <label className="text-gray-700 font-semibold">Current Image</label>
             {data.image && !removeImage ? (
               <img
-                src={`${import.meta.env.VITE_BACKEND_URL}/${data.image.replace(
-                  /^src\//,
-                  ""
-                )}`}
+                src={data.image}
                 className="w-full h-60 object-contain rounded-lg"
                 alt={data.name || "Current Image"}
               />
@@ -143,7 +141,7 @@ function UpdateBlogModal({ onClose, data }) {
                   <img
                     src={imagePreview}
                     alt="Selected"
-                    className="w-40 h-36 object-cover rounded-lg"
+                    className="w-full h-36 object-contain rounded-lg"
                   />
                   <button
                     type="button"
@@ -159,18 +157,7 @@ function UpdateBlogModal({ onClose, data }) {
                 </p>
               )}
 
-              <label
-                htmlFor="image"
-                className="btn bg-primary text-white lg:w-1/2 flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <IoCloudUploadOutline /> Upload Image
-              </label>
-              <input
-                type="file"
-                id="image"
-                className="hidden"
-                onChange={handleFileChange}
-              />
+              <UploadButton params={handleFileChange} />
 
               <label className="flex items-center space-x-2">
                 <input

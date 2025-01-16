@@ -61,13 +61,7 @@ function UpdateBlog() {
             >
               <figure className="relative h-40 w-full overflow-hidden">
                 <img
-                  src={
-                    blog.image
-                      ? `${
-                          import.meta.env.VITE_BACKEND_URL
-                        }/${blog.image.replace(/^src\//, "")}`
-                      : "/default-profile.png"
-                  }
+                  src={blog.image}
                   alt={blog.title}
                   className="h-full w-full object-cover transition-transform duration-500 hover:scale-110"
                 />

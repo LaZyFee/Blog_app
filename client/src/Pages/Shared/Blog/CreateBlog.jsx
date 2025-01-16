@@ -1,20 +1,27 @@
 /* eslint-disable react/prop-types */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { IoCloudUploadOutline } from "react-icons/io5";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import useBlogStore from "../../../Store/BlogStore";
 import showToast from "../../../Utils/ShowToast";
+import { UploadButton } from "../../../Utils/UploadButton";
 
 // Separate ImageUploader Component
 function ImageUploader({ image, setImage }) {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (file && ["image/jpeg", "image/png"].includes(file.type)) {
+    if (
+      file &&
+      ["image/jpeg", "image/png", "image/webp", "image/jpg"].includes(file.type)
+    ) {
       setImage(file);
     } else {
-      showToast("Error", "Please upload a valid image (JPEG/PNG)", "error");
+      showToast(
+        "Error",
+        "Please upload a valid image (JPEG/PNG/WEBP/JPG)",
+        "error"
+      );
     }
   };
 
@@ -30,18 +37,7 @@ function ImageUploader({ image, setImage }) {
           />
         </div>
       )}
-      <label
-        htmlFor="image"
-        className="btn bg-primary text-white lg:w-1/3 flex items-center justify-center gap-2 cursor-pointer"
-      >
-        <IoCloudUploadOutline /> Upload Image
-      </label>
-      <input
-        type="file"
-        id="image"
-        className="hidden"
-        onChange={handleImageChange}
-      />
+      <UploadButton params={handleImageChange} />
     </div>
   );
 }

@@ -34,14 +34,7 @@ function DetailsBlog() {
         {/* Blog Header with Image */}
         <div className="relative overflow-hidden rounded-lg shadow-lg">
           <img
-            src={
-              blog.image
-                ? `${import.meta.env.VITE_BACKEND_URL}/${blog.image.replace(
-                    /^src\//,
-                    ""
-                  )}`
-                : "/default-profile.png"
-            }
+            src={blog.image}
             alt={blog.title}
             className="w-full h-[400px] object-cover"
           />
@@ -55,13 +48,7 @@ function DetailsBlog() {
                 className="flex items-center gap-2 hover:underline"
               >
                 <img
-                  src={
-                    blog.createdBy?.profilepic
-                      ? `${
-                          import.meta.env.VITE_BACKEND_URL
-                        }/${blog.createdBy.profilepic.replace(/^src\//, "")}`
-                      : "/default-profile.png"
-                  }
+                  src={blog.createdBy?.profilepic}
                   alt={blog.createdBy?.name || "Unknown Author"}
                   className="w-8 h-8 rounded-full border-2 border-white"
                 />

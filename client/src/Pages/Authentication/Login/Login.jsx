@@ -37,71 +37,71 @@ function Login() {
   };
 
   return (
-    <div className=" min-h-screen">
-      {" "}
-      <div className="text-center my-10">
-        <h1 className="text-3xl font-bold">Welcome to Blog Web App</h1>
-      </div>
-      <div className="hero">
-        <div className="flex-col border border-black p-4 lg:w-1/3">
-          <h1 className="text-3xl font-bold my-4">Log in to your account</h1>
-          <div className="card w-full max-w-sm shrink-0">
-            <form onSubmit={handleSubmit(handleLogin)}>
-              <div className="form-control">
-                <input
-                  type="text"
-                  {...register("email", {
-                    required: "Email Address is required",
-                  })}
-                  placeholder="Email"
-                  className="w-full border-b border-gray-400 bg-transparent p-2 my-2 placeholder-gray-600"
-                />
-                {errors.email && (
-                  <p className="text-red-600">{errors.email.message}</p>
-                )}
-              </div>
-
-              <div className="form-control">
-                <input
-                  type="password"
-                  {...register("password", {
-                    required: "Password is required",
-                  })}
-                  placeholder="Password"
-                  className="w-full border-b border-gray-400 bg-transparent my-2 p-2 placeholder-gray-600"
-                />
-                {errors.password && (
-                  <p className="text-red-600">{errors.password.message}</p>
-                )}
-              </div>
-
-              <label className="label">
-                {" "}
-                <Link className="label-text" to="/forgot-password">
-                  Forget Password?
-                </Link>
-              </label>
-
-              {loginError && <p className="text-red-600">{loginError}</p>}
-
-              <div className="form-control my-3.5">
-                <button
-                  className="w-full btn btn-primary"
-                  type="submit"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Logging in" : "Login"}
-                </button>
-              </div>
-            </form>
-
-            <p>
-              New to Expense Tracker?{" "}
-              <Link className="text-[#F63E7B]" to="/signup">
-                Create new Account
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="max-w-md w-full p-6 border border-gray-200 rounded-lg shadow-lg bg-white">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-extrabold text-gray-800">
+            Blog Web App
+          </h1>
+          <p className="mt-2 text-gray-600">Log in to your account</p>
+        </div>
+        <form onSubmit={handleSubmit(handleLogin)}>
+          <div className="space-y-4">
+            <div>
+              <input
+                type="email"
+                {...register("email", {
+                  required: "Email Address is required",
+                })}
+                placeholder="Enter your email"
+                className="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none"
+              />
+              {errors.email && (
+                <p className="text-sm text-red-600 mt-1">
+                  {errors.email.message}
+                </p>
+              )}
+            </div>
+            <div>
+              <input
+                type="password"
+                {...register("password", {
+                  required: "Password is required",
+                })}
+                placeholder="Enter your password"
+                className="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none"
+              />
+              {errors.password && (
+                <p className="text-sm text-red-600 mt-1">
+                  {errors.password.message}
+                </p>
+              )}
+            </div>
+            <div className="text-right">
+              <Link
+                to="/forgot-password"
+                className="text-indigo-600 text-sm hover:underline"
+              >
+                Forgot Password?
               </Link>
-            </p>
+            </div>
+            {loginError && <p className="text-sm text-red-600">{loginError}</p>}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-400 focus:outline-none"
+            >
+              {isLoading ? "Logging in..." : "Login"}
+            </button>
           </div>
+        </form>
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-600">
+            New to Blog Web App?{" "}
+            <Link to="/signup" className="text-indigo-600 hover:underline">
+              Create an account
+            </Link>
+          </p>
         </div>
       </div>
     </div>

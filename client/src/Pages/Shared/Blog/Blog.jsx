@@ -20,7 +20,7 @@ function Blog() {
     (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
   );
   // Truncate long descriptions
-  const truncateDescription = (description, maxLength = 100) => {
+  const truncateDescription = (description, maxLength = 300) => {
     if (description.length > maxLength) {
       return `${description.slice(
         0,
@@ -44,14 +44,7 @@ function Blog() {
           {/* Image Section */}
           <div className="overflow-hidden rounded-lg">
             <img
-              src={
-                blog.image
-                  ? `${import.meta.env.VITE_BACKEND_URL}/${blog.image.replace(
-                      /^src\//,
-                      ""
-                    )}`
-                  : "/default-profile.png"
-              }
+              src={blog.image}
               alt={blog.title}
               loading="lazy"
               className="h-[250px] w-full object-cover transition-transform duration-500 hover:scale-110"
@@ -70,13 +63,7 @@ function Blog() {
               className="flex items-center gap-2 text-sm font-medium hover:text-blue-500"
             >
               <img
-                src={
-                  blog.createdBy?.profilepic
-                    ? `${
-                        import.meta.env.VITE_BACKEND_URL
-                      }/${blog.createdBy.profilepic.replace(/^src\//, "")}`
-                    : "/default-profile.png"
-                }
+                src={blog.createdBy?.profilepic}
                 alt={blog.createdBy?.name || "Unknown Author"}
                 className="w-8 h-8 rounded-full border border-gray-300"
               />
@@ -89,11 +76,11 @@ function Blog() {
           {/* Content Section */}
           <Link to={"/blog-data"} state={{ blogId: blog._id }}>
             <div className="space-y-3 py-3">
-              <h2 className="text-lg font-semibold text-primary">
+              <h2 className="text-lg font-semibold text-primary text-pre-wrap">
                 {blog.title}
               </h2>
               <p
-                className="text-sm leading-relaxed"
+                className="text-sm leading-relaxed text-pre-wrap"
                 dangerouslySetInnerHTML={{
                   __html: DOMPurify.sanitize(truncateDescription(blog.content)),
                 }}

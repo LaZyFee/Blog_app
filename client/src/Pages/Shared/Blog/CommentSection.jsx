@@ -84,13 +84,7 @@ function CommentSection({ blogId }) {
           >
             <div className="flex items-center">
               <img
-                src={
-                  reply.createdBy?.profilepic
-                    ? `${
-                        import.meta.env.VITE_BACKEND_URL
-                      }/${reply.createdBy.profilepic.replace(/^src\//, "")}`
-                    : "/default-profile.png"
-                }
+                src={reply.createdBy?.profilepic}
                 alt={reply.createdBy?.name || "Unknown"}
                 className="w-8 h-8 rounded-full mr-2"
               />
@@ -171,13 +165,7 @@ function CommentSection({ blogId }) {
       {user ? (
         <div className="flex items-center max-w-2xl">
           <img
-            src={
-              user.profilePic
-                ? `${
-                    import.meta.env.VITE_BACKEND_URL
-                  }/${user.profilePic.replace(/^src\//, "")}`
-                : "/default-profile.png"
-            }
+            src={user.profilePic}
             alt={user.name || "User"}
             className="w-10 h-10 rounded-full mr-4 object-cover"
           />
@@ -215,13 +203,7 @@ function CommentSection({ blogId }) {
           <div key={comment._id} className="rounded-lg mb-6  p-4">
             <div className="flex">
               <img
-                src={
-                  comment.createdBy?.profilepic
-                    ? `${
-                        import.meta.env.VITE_BACKEND_URL
-                      }/${comment.createdBy.profilepic.replace(/^src\//, "")}`
-                    : "/default-profile.png"
-                }
+                src={comment.createdBy?.profilepic}
                 alt={comment.createdBy?.name || "Unknown"}
                 className="w-10 h-10 rounded-full mr-2"
               />

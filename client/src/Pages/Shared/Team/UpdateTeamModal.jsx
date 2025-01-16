@@ -3,6 +3,7 @@ import { useState } from "react";
 import { IoCloudUploadOutline, IoTrashOutline } from "react-icons/io5";
 import showToast from "../../../Utils/ShowToast";
 import { useTeamStore } from "../../../Store/TeamStore";
+import { UploadButton } from "../../../Utils/UploadButton";
 
 function UpdateTeamModal({ onClose, data }) {
   const { updateTeamMember } = useTeamStore();
@@ -83,10 +84,8 @@ function UpdateTeamModal({ onClose, data }) {
               </label>
               {data.image && !removeImage ? (
                 <img
-                  src={`${
-                    import.meta.env.VITE_BACKEND_URL
-                  }/${data.image.replace(/^src\//, "")}`}
-                  className="w-full h-60 object-cover rounded-lg"
+                  src={data.image}
+                  className="w-full h-60 object-contain rounded-lg"
                   alt={data.name || "Current Image"}
                 />
               ) : (
@@ -128,7 +127,7 @@ function UpdateTeamModal({ onClose, data }) {
                   <img
                     src={imagePreview}
                     alt="Selected"
-                    className="w-40 h-36 object-cover rounded-lg"
+                    className="w-full h-36 object-contain rounded-lg"
                   />
                   <button
                     type="button"
@@ -144,18 +143,7 @@ function UpdateTeamModal({ onClose, data }) {
                 </p>
               )}
 
-              <label
-                htmlFor="image"
-                className="btn bg-primary text-white lg:w-1/2 flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <IoCloudUploadOutline /> Upload Image
-              </label>
-              <input
-                type="file"
-                id="image"
-                className="hidden"
-                onChange={handleFileChange}
-              />
+              <UploadButton params={handleFileChange} />
 
               <label className="flex items-center space-x-2">
                 <input

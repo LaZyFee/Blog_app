@@ -46,7 +46,6 @@ const useBlogStore = create((set, get) => ({
       const response = await axiosInstance.post("/create-blog", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
-          user_id: blogData.userId, // Assuming user_id is passed in blogData
         },
       });
       set((state) => ({

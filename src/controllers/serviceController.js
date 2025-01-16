@@ -7,7 +7,8 @@ export const CreateService = async (req, res) => {
             res.status(400).json({ mesage: "All fields are required" })
             return;
         }
-        const ServicePicPath = req.file ? req.file.path.replace(/\\/g, "/") : ""
+        // const ServicePicPath = req.file ? req.file.path.replace(/\\/g, "/") : ""
+        const ServicePicPath = req.file ? req.file.path : ""
 
         const service = await ServiceModel.create({
             title,
@@ -51,7 +52,8 @@ export const UpdateService = async (req, res) => {
 
         if (req.file && req.body.removeImage !== "true") {
             deleteImage(existingService.image);
-            updateFields.image = req.file.path.replace(/\\/g, "/");
+            // updateFields.image = req.file.path.replace(/\\/g, "/");
+            updateFields.image = req.file.path;
         }
 
         const updatedService = await ServiceModel.findByIdAndUpdate(
