@@ -35,7 +35,7 @@ function Signup() {
       navigate("/");
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Error signing up";
-      setSignUpError(errorMessage);
+      setSignUpError(errorMessage); // For additional error handling if needed
       showToast("Error", errorMessage, "error");
     }
   };

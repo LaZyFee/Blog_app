@@ -16,12 +16,12 @@ function Home() {
       <div data-aos="fade-up">
         <CreatePost />
       </div>
-      <div className="flex flex-col md:flex-row justify-between gap-8 relative">
+      <div className="flex flex-col md:flex-row justify-between gap-8">
         <div data-aos="fade-left">
           {/* Blog Component */}
           <Blog />
         </div>
-        <div data-aos="fade-right" className="sticky top-5 h-max">
+        <div data-aos="fade-right">
           <RightCol />
         </div>
       </div>

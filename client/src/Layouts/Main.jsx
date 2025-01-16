@@ -33,7 +33,7 @@ function Main() {
   };
 
   return (
-    <div className="lg:container mx-2 lg:mx-auto">
+    <div className="container mx-2 lg:mx-auto">
       <Navbar onDropdownToggle={setMarginTop} />
       <div
         style={{ marginTop: marginTop ? "100px" : "0" }}

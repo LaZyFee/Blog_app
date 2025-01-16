@@ -27,11 +27,9 @@ export const useAuth = create((set) => ({
         throw new Error("User or token not provided in response");
       }
     } catch (error) {
-      console.error("Signup error:", error);
-      set({
-        error: error.response?.data?.message || "Error signing up",
-        isLoading: false,
-      });
+      console.error("Error signing up:", error);
+      const errorMessage = error.response?.data?.message || "Error signing up";
+      set({ error: errorMessage, isLoading: false });
       throw error;
     }
   },
