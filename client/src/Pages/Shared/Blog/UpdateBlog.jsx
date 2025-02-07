@@ -53,11 +53,11 @@ function UpdateBlog() {
       </h1>
 
       {userBlogs.length > 0 ? (
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 mt-8 mx-auto">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 mt-8 mx-auto">
           {userBlogs.map((blog) => (
             <div
               key={blog._id}
-              className="card bg-base-200 shadow-md hover:shadow-lg transition-shadow duration-300 rounded-lg overflow-hidden"
+              className="card bg-base-200 shadow-md hover:shadow-lg transition-shadow duration-300 rounded-lg overflow-hidden w-96"
             >
               <figure className="relative h-40 w-full overflow-hidden">
                 <img

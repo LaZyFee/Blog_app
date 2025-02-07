@@ -1,7 +1,7 @@
 import { generateToken } from "../utilities/generateToken.js";
 import { UserModel } from "../models/userModel.js";
 import bcrypt from 'bcrypt'
-
+import { uploadToCloudinary } from "../config/cloudinary.js";
 export const Register = async (req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -20,8 +20,10 @@ export const Register = async (req, res) => {
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Upload profile picture
-        const profilePicUrl = req.file ? req.file.path : "";
+        let profilePicUrl = "";
+        if (req.file) {
+            profilePicUrl = await uploadToCloudinary(req.file.buffer, "blog_app_profile_pics");
+        }
 
 
         const user = await UserModel.create({

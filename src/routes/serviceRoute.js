@@ -1,13 +1,13 @@
 import express from 'express'
-import { uploadServicePic } from '../utilities/multer.js'
 import { CreateService, UpdateService, GetAllServices, RemoveService } from '../controllers/serviceController.js'
+import { uploadSingle } from '../config/multer.js';
 
 const router = express.Router()
 //create services
-router.post('/create-service', uploadServicePic.single('image'), CreateService)
+router.post('/create-service', uploadSingle, CreateService)
 
 // Update service with image upload
-router.put("/updateService/:id", uploadServicePic.single("image"), UpdateService);
+router.put("/updateService/:id", uploadSingle, UpdateService);
 
 // Get all services
 router.get("/getAllServices", GetAllServices);

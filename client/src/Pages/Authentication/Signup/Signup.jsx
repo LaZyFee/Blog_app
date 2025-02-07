@@ -27,7 +27,7 @@ function Signup() {
     formData.append("name", name);
     formData.append("email", email);
     formData.append("password", password);
-    formData.append("profilepic", profilepic[0]);
+    formData.append("image", profilepic[0]);
 
     try {
       await signup(formData);
@@ -55,7 +55,7 @@ function Signup() {
 
   return (
     <div className="flex w-full flex-col items-center justify-center min-h-screen py-10 px-4">
-      <div className="w-full max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl p-8 transform hover:scale-105 transition-transform">
+      <div className="w-full max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl p-8">
         <h1 className="text-4xl font-bold text-gray-800 text-center">
           Create Account
         </h1>

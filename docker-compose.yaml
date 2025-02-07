@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  backend:
+    container_name: backend
+    build:
+      context: .  # Use root as context
+      dockerfile: src/Dockerfile  # Dockerfile is inside src/
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/usr/src/app  # Mount entire project root
+      - /usr/src/app/node_modules  # Prevent overwriting node_modules
+    working_dir: /usr/src/app
+    command: ["npx", "nodemon", "--legacy-watch", "index.js"]
+    environment:
+      - NODE_ENV=development
+
+
+
+  frontend:
+    container_name: frontend
+    build:
+      context: ./client
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client:/usr/src/app
+      - /usr/src/app/node_modules
+    working_dir: /usr/src/app
+    command: ["npm", "run", "dev"]

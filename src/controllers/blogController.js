@@ -1,7 +1,7 @@
 import { BlogModel } from "../models/blogModel.js";
 import { UserModel } from "../models/userModel.js";
 import { deleteImage } from '../utilities/deleteImage.js';
-
+import { uploadToCloudinary } from "../config/cloudinary.js";
 
 export const CreateBlog = async (req, res) => {
     try {
@@ -24,15 +24,16 @@ export const CreateBlog = async (req, res) => {
             });
         }
 
-        // Handle blog picture path
-        // const blogPicPath = req.file ? req.file.path.replace(/\\/g, "/") : "";
-        const blogPicPath = req.file ? req.file.path : "";
+        let imageUrl = "";
+        if (req.file) {
+            imageUrl = await uploadToCloudinary(req.file.buffer, "blog_app_blog_pics");
+        }
 
         // Create a new blog
         const newBlog = await BlogModel.create({
             title,
             content,
-            image: blogPicPath,
+            image: imageUrl,
             createdBy: user._id,
         });
 
@@ -40,14 +41,12 @@ export const CreateBlog = async (req, res) => {
         user.author.push(newBlog._id);
         await user.save();
 
-        // Send success response
         res.status(201).json({
             status: "success",
             message: "Blog created successfully",
             data: newBlog
         });
     } catch (error) {
-        // Handle errors
         console.error("Error creating blog:", error);
         res.status(500).json({
             status: "failed",
@@ -71,26 +70,28 @@ export const UpdateBlog = async (req, res) => {
             });
         }
 
-        // Prepare the fields to update
         const updateFields = {};
 
         if (title) updateFields.title = title;
         if (content) updateFields.content = content;
 
         // Handle image removal
-        if (removeImage === "true") { // `removeImage` comes as a string from form-data
-            deleteImage(existingBlog.image); // Delete existing image from the server
-            updateFields.image = null; // Set the image to null
-        } else if (req.file) {
-            // Handle image upload
-            deleteImage(existingBlog.image); // Delete the old image if a new one is uploaded
-            updateFields.image = req.file.path; // Normalize file path
+        if (removeImage === "true" && existingBlog.image) {
+            await deleteImage(existingBlog.image); // Delete from Cloudinary
+            updateFields.image = "";
         }
 
-        // Update the blog document
+        // Handle new image upload
+        if (req.file) {
+            if (existingBlog.image) {
+                await deleteImage(existingBlog.image); // Delete old image before replacing
+            }
+            updateFields.image = await uploadToCloudinary(req.file.buffer, "blog_app_blog_pics");
+        }
+
+        // Update the blog
         const updatedBlog = await BlogModel.findByIdAndUpdate(id, updateFields, { new: true });
 
-        // Return the updated blog information
         res.status(200).json({
             status: "success",
             message: "Blog updated successfully.",
@@ -114,8 +115,15 @@ export const DeleteBlog = async (req, res) => {
             return res.status(404).json({ message: "Blog not found" });
         }
 
-        deleteImage(blog.image);
+        // Delete image from Cloudinary
+        if (blog.image) {
+            await deleteImage(blog.image);
+        }
+
+        // Delete the blog from DB
         await BlogModel.findByIdAndDelete(req.params.id);
+
+        // Remove blog ID from user's author array
         await UserModel.findByIdAndUpdate(blog.createdBy, { $pull: { author: req.params.id } });
 
         res.status(200).json({ message: "Blog and associated image deleted successfully" });

@@ -1,5 +1,7 @@
 import { ServiceModel } from '../models/serviceModel.js'
 import { deleteImage } from '../utilities/deleteImage.js';
+import { uploadToCloudinary } from "../config/cloudinary.js";
+
 export const CreateService = async (req, res) => {
     try {
         const { title, description, price } = req.body
@@ -7,14 +9,17 @@ export const CreateService = async (req, res) => {
             res.status(400).json({ mesage: "All fields are required" })
             return;
         }
-        // const ServicePicPath = req.file ? req.file.path.replace(/\\/g, "/") : ""
-        const ServicePicPath = req.file ? req.file.path : ""
+        let imageUrl = "";
+        if (req.file) {
+            imageUrl = await uploadToCloudinary(req.file.buffer, "blog_app_service_pics");
+        }
+
 
         const service = await ServiceModel.create({
             title,
             description,
             price,
-            image: ServicePicPath
+            image: imageUrl
         })
         res.status(200).json({
             status: "success",
@@ -45,15 +50,18 @@ export const UpdateService = async (req, res) => {
         if (req.body.price) updateFields.price = req.body.price;
         if (req.body.description) updateFields.description = req.body.description;
 
-        if (req.body.removeImage === "true") {
-            deleteImage(existingService.image);
+        // Handle image removal
+        if (req.body.removeImage === "true" && existingService.image) {
+            await deleteImage(existingService.image);
             updateFields.image = null;
         }
 
-        if (req.file && req.body.removeImage !== "true") {
-            deleteImage(existingService.image);
-            // updateFields.image = req.file.path.replace(/\\/g, "/");
-            updateFields.image = req.file.path;
+        // Handle new image upload
+        if (req.file) {
+            if (existingService.image) {
+                await deleteImage(existingService.image); // Delete previous image
+            }
+            updateFields.image = req.file.path; // Store new image path
         }
 
         const updatedService = await ServiceModel.findByIdAndUpdate(
@@ -62,9 +70,30 @@ export const UpdateService = async (req, res) => {
             { new: true }
         );
 
-        res.status(200).json(updatedService);
+        res.status(200).json({ message: "Service updated successfully", updatedService });
     } catch (error) {
         res.status(400).json({ status: "failed to update", message: error.toString() });
+    }
+};
+
+export const RemoveService = async (req, res) => {
+    try {
+        const service = await ServiceModel.findById(req.params.id);
+        if (!service) {
+            return res.status(404).json({ message: "Service not found" });
+        }
+
+        // Delete image if it exists
+        if (service.image) {
+            await deleteImage(service.image);
+        }
+
+        // Delete service from DB
+        await ServiceModel.findByIdAndDelete(req.params.id);
+
+        res.status(200).json({ message: "Service deleted successfully", service });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
 };
 
@@ -72,19 +101,6 @@ export const GetAllServices = async (req, res) => {
     try {
         const services = await ServiceModel.find();
         res.status(200).json(services);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
-
-export const RemoveService = async (req, res) => {
-    try {
-        const service = await ServiceModel.findByIdAndDelete(req.params.id);
-        if (!service) {
-            return res.status(404).json({ message: "Service not found" });
-        }
-        deleteImage(service.image);
-        res.status(200).json({ message: "Service deleted successfully", service });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

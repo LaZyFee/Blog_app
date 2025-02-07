@@ -1,5 +1,4 @@
 import express from "express";
-import { uploadTeamMemberPic } from "../utilities/multer.js";
 import AuthMiddleware from '../middlewares/AuthMiddleware.js'
 import {
     CreateTeam,
@@ -8,12 +7,12 @@ import {
     GetAllTeamMembers,
     GetUserProfileWithTeam
 } from "../controllers/TeamController.js";
-import { multerErrorHandler } from "../middlewares/MulterErrorHaandler.js";
+import { uploadSingle } from "../config/multer.js";
 
 const router = express.Router();
 
-router.post("/create-team", AuthMiddleware, multerErrorHandler(uploadTeamMemberPic.single("image")), CreateTeam);
-router.put("/team/:id", AuthMiddleware, multerErrorHandler(uploadTeamMemberPic.single("image")), UpdateTeam);
+router.post("/create-team", AuthMiddleware, uploadSingle, CreateTeam);
+router.put("/team/:id", AuthMiddleware, uploadSingle, UpdateTeam);
 router.delete("/team/:id", AuthMiddleware, RemoveOne);
 router.get("/:user_id/team", GetAllTeamMembers);
 router.get("/profile/:userId", GetUserProfileWithTeam);

@@ -1,6 +1,6 @@
 /*eslint-disable*/
 import { useState } from "react";
-import { IoCloudUploadOutline, IoTrashOutline } from "react-icons/io5";
+import { IoTrashOutline } from "react-icons/io5";
 import useBlogStore from "../../../Store/BlogStore";
 import showToast from "../../../Utils/ShowToast";
 import ReactQuill from "react-quill";

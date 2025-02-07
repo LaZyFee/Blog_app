@@ -1,12 +1,12 @@
 /*eslint-disable*/
 import { useState } from "react";
-import { IoCloudUploadOutline, IoTrashOutline } from "react-icons/io5";
+import { IoTrashOutline } from "react-icons/io5";
 import showToast from "../../../Utils/ShowToast";
 import { useTeamStore } from "../../../Store/TeamStore";
 import { UploadButton } from "../../../Utils/UploadButton";
 
 function UpdateTeamModal({ onClose, data }) {
-  const { updateTeamMember } = useTeamStore();
+  const { updateTeamMember, isLoading } = useTeamStore();
 
   const [formData, setFormData] = useState({
     name: data?.name || "",
@@ -168,9 +168,10 @@ function UpdateTeamModal({ onClose, data }) {
               </button>
               <button
                 type="submit"
-                className="btn bg-primary px-8 py-2 text-white"
+                className="btn bg-orange-500 px-8 py-2 text-white"
+                disabled={isLoading}
               >
-                Submit
+                {isLoading ? "Submitting..." : "Submit"}
               </button>
             </div>
           </div>
