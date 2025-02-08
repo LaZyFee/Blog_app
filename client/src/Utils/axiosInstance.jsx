@@ -1,8 +1,8 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "/api", // Use .env for base URL
-  withCredentials: true, // Include credentials
+  baseURL: import.meta.env.VITE_API_URL,
+  withCredentials: true, // Send cookies
 });
 
 // Add a request interceptor
