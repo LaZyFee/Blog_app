@@ -131,7 +131,7 @@ By default, the frontend runs on http://localhost:5173.
 
 | Home Page                      | Main Section                   | Profile                              | Create-blog                        |
 | ------------------------------ | ------------------------------ | ------------------------------------ | ---------------------------------- |
-| ![Home](Screenshoots\home.png) | ![Main](Screenshoots\main.png) | ![Profile](Screenshoots\profile.png) | ![create](Screenshoots\create.png) |
+| ![Home](Screenshoots/home.png) | ![Main](Screenshoots/main.png) | ![Profile](Screenshoots/profile.png) | ![create](Screenshoots/create.png) |
 
 ---
 
