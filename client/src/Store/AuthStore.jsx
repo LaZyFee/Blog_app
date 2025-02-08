@@ -2,7 +2,11 @@ import { create } from "zustand";
 import axios from "axios";
 
 axios.defaults.withCredentials = true;
-axios.defaults.baseURL = "/api";
+axios.defaults.baseURL =
+  import.meta.env.MODE === "production"
+    ? "https://blog-app-sigma-neon.vercel.app/api/v1"
+    : import.meta.env.VITE_BACKEND_URL;
+
 export const useAuth = create((set) => ({
   user: (() => {
     const storedUser = localStorage.getItem("user");
