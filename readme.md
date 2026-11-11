@@ -1,173 +1,135 @@
 # 🌐 Blog Web App (MERN Stack)
 
-A full-stack **MERN** (MongoDB, Express, React, Node.js) blog application with user authentication, real-time interactions, and role-based access control.
+A full-stack MERN blog application with authentication, comments, reactions, author profiles, and a content-rich blogging experience.
 
-##### visit: https://blog-web-appx.netlify.app
+## Live Demo
 
-## 🚀 Features
+- Website: https://blog-web-appx.netlify.app
 
-### ✨ Key Features:
+## Features
 
-- **📝 Interactive Posts**: Users can **create, edit, and delete** their own blog posts, with **real-time like, dislike, and comment counters**.
-- **💬 Commenting System**: Includes **replies on comments** with **like/dislike** functionality for both **comments** and **replies**.
-- **👤 Personalized Profiles**:
-  - **For Authors**: Access a customized layout to manage posts, create or edit teams, and update content.
-  - **For Visitors**: Explore the profiles of authors to learn more about their work.
-- **🔒 Role-Specific Access**:
-  - **Logged-In Users**: Engage with posts via **likes, dislikes, comments, and replies**.
-  - **Visitors**: View posts without the ability to interact, ensuring clear boundaries for non-users.
+- Create, edit, and delete blog posts
+- Comments and nested replies
+- Likes and dislikes for blogs, comments, and replies
+- Author profiles and blog collections
+- Role-based access control
+- Cloudinary-powered image uploads
 
----
+## Project Structure
 
-### Backend:
-
-- **Node.js** + **Express.js** - Server-side framework
-- **MongoDB** + **Mongoose** - Database & ODM
-- **Multer** - File uploads
-- **Cloudinary** - Image hosting
-- **bcrypt.js** - Password hashing
-- **JWT (JSON Web Token)** - Authentication
-
-### Frontend:
-
-- **React.js** (Vite) - Frontend framework
-- **Zustand** - State management
-- **React Router** - Client-side navigation
-- **Axios** - HTTP requests
-- **React Hook Form** - Form validation
-- **React Quill** / **TinyMCE** - Rich text editors
-- **DOMPurify** - Prevents XSS attacks
-- **Lucide-react** / **React Icons** - UI Icons
-- **SweetAlert2** - Alerts & popups
-- **DaisyUI + TailwindCSS** - UI styling
-- **AOS (Animate on Scroll)** - Smooth animations
-
----
-
-## 🏗 Installation & Setup
-
-### 1️⃣ Clone the Repository:
-
-```sh
-git clone https://github.com/LaZyFee/Blog_app
-cd blog-web-app
+```text
+Blog_app/
+├── client/                 # React + Vite frontend
+├── src/                    # Express backend
+├── index.js                # backend entry point
+├── package.json            # root scripts and dependencies
+├── readme.md              # project docs
+├── docker-compose.yaml     # local development services
+└── .env.example           # optional environment template
 ```
 
-### 2️⃣ Install Backend Dependencies:
+## Installation & Setup
+
+### 1. Clone the repository
 
 ```sh
-cd server
+git clone https://github.com/LaZyFee/Blog_app.git
+cd Blog_app
+```
+
+### 2. Install backend dependencies
+
+```sh
 npm install
 ```
 
-### 3️⃣ Set Up Environment Variables (.env in server):
+### 3. Set up environment variables
 
-```sh
+Create a `.env` file in the project root with the following values:
+
+```env
 MONGO_URI=your-mongodb-uri
 JWT_SECRET=your-secret-key
-CLOUDINARY_NAME=your-cloudinary-name
+CLOUDINARY_CLOUD_NAME=your-cloudinary-name
 CLOUDINARY_API_KEY=your-cloudinary-api-key
 CLOUDINARY_API_SECRET=your-cloudinary-secret
+PORT=5000
 ```
 
-### 4️⃣ Start Backend Server:
+### 4. Start the backend
 
 ```sh
-npm start
+npm run server
 ```
 
-By default, the backend runs on http://localhost:5000.
+By default the backend runs on http://localhost:5000.
 
-### 5️⃣ Install Frontend Dependencies:
+### 5. Install client dependencies
 
 ```sh
-cd ../client
+cd client
 npm install
 ```
 
-### 6️⃣ Set Up Frontend Environment Variables (.env in client):
+### 6. Set up frontend environment variables
 
-```sh
-VITE_API_BASE_URL=http://localhost:5000/api/v1
+Create a `.env` in `client/` with:
+
+```env
+VITE_API_URL=http://localhost:5000/api/v1
 ```
 
-### 7️⃣ Start Frontend:
+### 7. Start the frontend
 
 ```sh
 npm run dev
 ```
 
-By default, the frontend runs on http://localhost:5173.
+By default the frontend runs on http://localhost:5173.
 
-## 🚀 Deployment Guide
+### 8. Run everything together
 
-### 🔹 **Backend Deployment** (Vercel, Render, or Railway)
+From the root directory:
 
-1. Create a MongoDB Atlas database: [MongoDB Atlas](https://www.mongodb.com/atlas)
+```sh
+npm run dev
+```
 
-2. Deploy your backend on one of the following platforms:
-   - [Vercel](https://vercel.com)
-   - [Render](https://render.com)
-   - [Railway](https://railway.app)
-3. Update your `.env` file with the **deployed backend URL**.
+This starts the backend and frontend concurrently.
 
-### 🔹 **Frontend Deployment** (Netlify or Vercel)
+## Deployment Guide
 
-1. Choose a hosting provider:
+### Backend
 
-   - [Netlify](https://www.netlify.com/)
-   - [Vercel](https://vercel.com/)
+- Deploy to Render, Railway, or Vercel
+- Set the same environment variables in the hosting platform
 
-2. Link your **GitHub repository** and deploy your app.
+### Frontend
 
-3. Update your `.env` file in the frontend:
-   ```plaintext
-   VITE_API_BASE_URL=https://your-deployed-backend-url/api
-   ```
+- Deploy to Netlify or Vercel
+- Set `VITE_API_URL` to the deployed backend URL
 
----
+## Security and Quality Improvements Added
 
-## 🖼️ Screenshots
+- Auth middleware now handles missing and invalid tokens safely
+- Blog update/delete routes are protected by authentication
+- Only the owner or admin can mutate a blog
+- Pagination is included for blog listing results
+- Setup instructions have been corrected for the actual repo structure
 
-| Home Page                      | Main Section                   | Profile                              | Create-blog                        |
-| ------------------------------ | ------------------------------ | ------------------------------------ | ---------------------------------- |
-| ![Home](Screenshoots/home.png) | ![Main](Screenshoots/main.png) | ![Profile](Screenshoots/profile.png) | ![create](Screenshoots/create.png) |
+## Future Enhancements
 
----
+- OAuth login
+- Drafts and scheduled publishing
+- Followers / reading lists
+- Post moderation and reporting
+- Revision history
+- Search, filtering, and tags
+- RSS and SEO metadata
 
-## 💡 Future Enhancements
+## Contributing
 
-| Feature                                        | Category             | Priority  |
-| ---------------------------------------------- | -------------------- | --------- |
-| 🔐 OAuth Authentication (Google, GitHub, etc.) | Security             | 🔴 High   |
-| 🏷️ Category & Tag-Based Blog Filtering         | User Experience      | 🔴 High   |
-| 🔍 Search & Sorting for Blogs                  | User Experience      | 🔴 High   |
-| 🖼️ Add Table & Image Support in Content Editor | Content Management   | 🔴 High   |
-| 📄 Pagination for Blogs                        | Performance          | 🔴 High   |
-| 📌 Bookmark & Save Posts                       | User Engagement      | 🟡 Medium |
-| 🔗 Social Media Sharing for Posts              | User Engagement      | 🟡 Medium |
-| 📩 Email Notifications for Comments & Replies  | User Experience      | 🟡 Medium |
-| 📱 PWA (Progressive Web App) Support           | Mobile Optimization  | 🟢 Low    |
-| 📊 Analytics Dashboard for Authors             | Insights & Analytics | 🟢 Low    |
-
----
-
-## 🤝 _Contributing_
-
-1. _Fork_ the repository.
-2. _Create a branch_ (`git checkout -b feature-branch`).
-3. _Commit your changes_ (`git commit -m 'Added new feature'`).
-4. _Push_ to the branch (`git push origin feature-branch`).
-5. _Create a Pull Request_.
-
----
-
-## 📞 _Contact_
-
-- **Email**: *rhr277@gmail.com*
-- **GitHub**: _[LaZyFee](https://github.com/LaZyFee)_
-- **LinkedIn**: _[Rabiul_Rafee](https://www.linkedin.com/in/rabiul-rafee-361224183)_
-
----
-
-_Made with ❤️ by **[Rabiul Rafee]**_
+1. Fork the project
+2. Create a branch
+3. Commit your changes
+4. Open a pull request

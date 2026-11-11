@@ -5,8 +5,9 @@
   "scripts": {
     "start": "node index.js",
     "server": "nodemon index.js",
-    "client": "npm start --prefix client",
+    "client": "npm run dev --prefix client",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "test": "node --test",
     "vercel-build": "cd client && NPM_CONFIG_PRODUCTION=false npm install && npm run build"
   },
   "keywords": [],
@@ -17,6 +18,8 @@
   "dependencies": {
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.5.1",
+    "concurrently": "^9.1.2",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.1",
