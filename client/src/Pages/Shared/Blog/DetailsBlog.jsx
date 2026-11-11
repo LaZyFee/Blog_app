@@ -1,7 +1,7 @@
 import { useEffect } from "react";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 import useBlogStore from "../../../Store/BlogStore";
 import Skeleton from "../../../Components/Skeleton";
-import { Link, useLocation } from "react-router-dom";
 import { IoMdTime } from "react-icons/io";
 import { formatDate } from "../../../Utils/formatedate";
 import CommentSection from "./CommentSection";
@@ -9,75 +9,36 @@ import DOMPurify from "dompurify";
 
 function DetailsBlog() {
   const location = useLocation();
-  const { blogId } = location.state || {};
-  const { blog, fetchBlogById, loading, error: blogError } = useBlogStore();
+  const navigate = useNavigate();
+  const blogId = location.state?.blogId || location.pathname.split("/").filter(Boolean).at(-1);
+  const { blog, fetchBlogById, loading, error, clearError } = useBlogStore();
 
   useEffect(() => {
     if (blogId) fetchBlogById(blogId);
   }, [blogId, fetchBlogById]);
 
-  if (loading) return <Skeleton />;
-  if (blogError) return <p className="text-red-500">{blogError}</p>;
-  if (!blog) return <p className="text-gray-500">Blog not found</p>;
+  if (loading && !blog) return <Skeleton />;
+  if (error) return <div role="alert" className="mx-auto max-w-3xl p-6 text-red-600">{error}<button type="button" className="ml-3 underline" onClick={clearError}>Dismiss</button></div>;
+  if (!blog) return <div className="p-6 text-center text-gray-500">Blog not found <button type="button" onClick={() => navigate(-1)} className="ml-2 underline">Go back</button></div>;
 
-  // Ensure Tailwind styles are applied to the rich text content
-  const renderContent = (content) => {
-    return DOMPurify.sanitize(content, {
-      ADD_TAGS: ["blockquote", "pre", "h2", "h3", "span"],
-      ADD_ATTR: ["class", "style"],
-    });
-  };
-
-  return (
-    <>
-      <div className="max-w-4xl mx-auto p-6">
-        {/* Blog Header with Image */}
-        <div className="relative overflow-hidden rounded-lg shadow-lg">
-          <img
-            src={blog.image}
-            alt={blog.title}
-            className="w-full h-[400px] object-cover"
-          />
-          <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center p-4 text-center">
-            <h1 className="text-3xl font-bold text-white mb-4">{blog.title}</h1>
-            <div className="flex justify-center items-center gap-4 text-white">
-              {/* Author Information */}
-              <Link
-                to="/user"
-                state={{ userId: blog.createdBy?._id }}
-                className="flex items-center gap-2 hover:underline"
-              >
-                <img
-                  src={blog.createdBy?.profilepic}
-                  alt={blog.createdBy?.name || "Unknown Author"}
-                  className="w-8 h-8 rounded-full border-2 border-white"
-                />
-                <span className="font-medium">
-                  {blog.createdBy?.name || "Unknown Author"}
-                </span>
-              </Link>
-
-              {/* Published Date */}
-              <div className="flex items-center gap-1 text-sm">
-                <IoMdTime />
-                <span>{formatDate(blog.createdAt)}</span>
-              </div>
-            </div>
-          </div>
+  const safeContent = DOMPurify.sanitize(blog.content, { ADD_TAGS: ["blockquote", "pre", "h2", "h3", "span"], ADD_ATTR: ["class", "style"] });
+  return <>
+    <article className="mx-auto max-w-4xl p-6">
+      {blog.image && <div className="relative overflow-hidden rounded-lg shadow-lg"><img src={blog.image} alt={blog.title} className="h-[400px] w-full object-cover"/></div>}
+      <header className="mt-5">
+        <h1 className="text-3xl font-bold">{blog.title}</h1>
+        <div className="mt-3 flex items-center gap-4 text-gray-600">
+          <Link to="/user" state={{ userId: blog.createdBy?._id }} className="flex items-center gap-2 hover:underline">
+            {blog.createdBy?.profilepic && <img src={blog.createdBy.profilepic} alt="" className="h-8 w-8 rounded-full object-cover"/>}
+            <span>{blog.createdBy?.name || "Unknown Author"}</span>
+          </Link>
+          <span className="flex items-center gap-1 text-sm"><IoMdTime/>{formatDate(blog.createdAt)}</span>
         </div>
-
-        {/* Blog Content */}
-        <div
-          className="mt-6 text-justify"
-          dangerouslySetInnerHTML={{ __html: renderContent(blog.content) }}
-        />
-      </div>
-      <div className="divider">
-        <h2 className="text-2xl font-bold mb-4 text-primary">Comments</h2>
-      </div>
-      <CommentSection blogId={blogId} blog={blog} />
-    </>
-  );
+      </header>
+      <div className="prose mt-6 max-w-none" dangerouslySetInnerHTML={{ __html: safeContent }}/>
+    </article>
+    <CommentSection key={blogId} blogId={blogId}/>
+  </>;
 }
 
 export default DetailsBlog;

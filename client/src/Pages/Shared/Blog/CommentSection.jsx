@@ -1,290 +1,105 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { IoMdTime } from "react-icons/io";
 import { useAuth } from "../../../Store/AuthStore";
 import useCommentsStore from "../../../Store/CommentStore";
 import { formatDate } from "../../../Utils/formatedate";
 import { Link } from "react-router-dom";
 import UserReact from "../../../Utils/UserReact";
-import showToast from "../../../Utils/ShowToast";
+
+const COMMENT_LIMIT = 10;
+const REPLY_LIMIT = 10;
 
 function CommentSection({ blogId }) {
   const { user } = useAuth();
   const {
-    comments,
-    isLoading: commentsLoading,
-    error: commentsError,
-    fetchComments,
-    createComment,
-    toggleLike,
-    addReply,
+    comments, pagination, isLoading, isLoadingMore, error,
+    fetchComments, fetchReplies, createComment, toggleLike, addReply, clearError,
   } = useCommentsStore();
-
   const [commentInput, setCommentInput] = useState("");
   const [replyInput, setReplyInput] = useState({});
-  const [showReplies, setShowReplies] = useState({});
-  const [commentsToShow, setCommentsToShow] = useState(8);
+  const [expandedReplies, setExpandedReplies] = useState({});
+  const [replyPages, setReplyPages] = useState({});
+  const [replyErrors, setReplyErrors] = useState({});
 
   useEffect(() => {
-    if (blogId) fetchComments(blogId);
-
-    // Outside click to close reply input
-    const handleClickOutside = (event) => {
-      if (!event.target.closest(".reply-container")) {
-        setReplyInput({});
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    if (!blogId) return;
+    fetchComments(blogId, { page: 1, limit: COMMENT_LIMIT });
+    setReplyInput({});
+    setExpandedReplies({});
+    setReplyPages({});
+    setReplyErrors({});
   }, [blogId, fetchComments]);
 
-  const handleCreateComment = async () => {
-    if (commentInput.trim()) {
-      await createComment(blogId, commentInput);
-      setCommentInput("");
-    }
+  const submitComment = async () => {
+    const value = commentInput.trim();
+    if (!value) return;
+    const result = await createComment(blogId, value);
+    if (result.success) setCommentInput("");
   };
 
-  const handleReply = async (commentId) => {
-    if (replyInput[commentId]?.trim()) {
-      await addReply(blogId, commentId, replyInput[commentId]);
-      setReplyInput((prev) => ({ ...prev, [commentId]: undefined }));
-    }
+  const submitReply = async (commentId) => {
+    const value = (replyInput[commentId] || "").trim();
+    if (!value) return;
+    const result = await addReply(blogId, commentId, value);
+    if (result.success) setReplyInput((state) => ({ ...state, [commentId]: "" }));
   };
 
-  const toggleReply = (commentId) => {
-    setReplyInput((prev) => ({
-      ...prev,
-      [commentId]: prev[commentId] !== undefined ? undefined : "",
+  const loadReplies = async (comment) => {
+    const nextPage = (replyPages[comment._id]?.page || 0) + 1;
+    const result = await fetchReplies(comment._id, { page: nextPage, limit: REPLY_LIMIT });
+    if (!result.success) {
+      setReplyErrors((state) => ({ ...state, [comment._id]: result.error }));
+      return;
+    }
+    setReplyErrors((state) => ({ ...state, [comment._id]: null }));
+    setReplyPages((state) => ({
+      ...state,
+      [comment._id]: { page: nextPage, pagination: result.pagination },
     }));
+    useCommentsStore.setState((state) => ({
+      comments: state.comments.map((item) => item._id === comment._id
+        ? { ...item, replies: [...(nextPage === 1 ? [] : item.replies || []), ...result.data] }
+        : item),
+    }));
+    setExpandedReplies((state) => ({ ...state, [comment._id]: true }));
   };
-
-  const toggleReplies = (commentId) => {
-    setShowReplies((prev) => ({ ...prev, [commentId]: !prev[commentId] }));
-  };
-
-  const loadMoreComments = () => {
-    setCommentsToShow((prev) => Math.min(prev + 8, comments.length));
-  };
-
-  const renderReplies = (replies, commentId) => {
-    const displayedReplies = showReplies[commentId]
-      ? replies
-      : replies.slice(0, 2);
-
-    if (commentsLoading) return <p>{commentsLoading}</p>;
-    if (commentsError) return <p>{commentsError}</p>;
-    return (
-      <div className="ml-8 mt-4">
-        {displayedReplies.map((reply) => (
-          <div
-            key={reply._id}
-            className="border-l-2 border-blue-500 pl-2 mb-2 ml-5"
-          >
-            <div className="flex items-center">
-              <img
-                src={reply.createdBy?.profilepic}
-                alt={reply.createdBy?.name || "Unknown"}
-                className="w-8 h-8 rounded-full mr-2"
-              />
-              <div>
-                <span className="font-semibold">
-                  {reply.createdBy?.name || "Unknown"}
-                </span>
-                <div className="flex items-center gap-1 text-sm text-gray-500 mt-1">
-                  <IoMdTime />
-                  <span>{formatDate(reply.createdAt)}</span>
-                </div>
-              </div>
-            </div>
-            <p className="mt-1">{reply.comment}</p>
-
-            <UserReact
-              id={reply._id}
-              likes={reply.likes || 0}
-              dislikes={reply.disLikes || 0}
-              reactions={reply.reactions || []}
-              toggleLike={(id, action) =>
-                toggleLike(id, action, "reply", reply.parent)
-              }
-            />
-
-            {replyInput[reply._id] !== undefined && (
-              <div className="reply-container mt-2 flex items-center">
-                <input
-                  type="text"
-                  value={replyInput[reply._id]}
-                  onChange={(e) =>
-                    setReplyInput((prev) => ({
-                      ...prev,
-                      [reply._id]: e.target.value,
-                    }))
-                  }
-                  placeholder="Write a reply..."
-                  className="flex-grow border rounded px-4 py-2"
-                />
-                <button
-                  onClick={() => handleReply(reply._id)}
-                  className="ml-2 bg-blue-500 text-white px-4 py-2 rounded"
-                >
-                  Post
-                </button>
-              </div>
-            )}
-          </div>
-        ))}
-
-        {replies.length > 2 && (
-          <button
-            onClick={() => toggleReplies(commentId)}
-            className="text-sm text-blue-500 mt-2 hover:underline"
-          >
-            {showReplies[commentId] ? "Show Less" : "Show More Replies"}
-          </button>
-        )}
-      </div>
-    );
-  };
-
-  if (commentsLoading)
-    return (
-      <>
-        <div className="flex w-52 flex-col gap-4">
-          <div className="skeleton h-32 w-full"></div>
-          <div className="skeleton h-4 w-28"></div>
-          <div className="skeleton h-4 w-full"></div>
-          <div className="skeleton h-4 w-full"></div>
-        </div>
-      </>
-    );
-  if (commentsError) return <p>{commentsError}</p>;
 
   return (
-    <div className="mt-8 max-w-4xl mx-auto p-6">
+    <section className="mx-auto mt-8 max-w-4xl p-6" aria-labelledby="comments-title">
+      <h2 id="comments-title" className="mb-4 text-2xl font-bold text-primary">Comments</h2>
+      {error && <div role="alert" className="mb-4 rounded border border-red-300 bg-red-50 p-3 text-red-700">{error}<button type="button" className="ml-3 underline" onClick={clearError}>Dismiss</button></div>}
       {user ? (
-        <div className="flex items-center max-w-2xl">
-          <img
-            src={user.profilePic}
-            alt={user.name || "User"}
-            className="w-10 h-10 rounded-full mr-4 object-cover"
-          />
-          <input
-            type="text"
-            value={commentInput}
-            onChange={(e) => setCommentInput(e.target.value)}
-            placeholder="Write a comment..."
-            className="flex-grow border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
-          <button
-            onClick={handleCreateComment}
-            disabled={!commentInput.trim()} // Disable if input is empty
-            className={`ml-4 px-4 py-2 rounded ${
-              commentInput.trim()
-                ? "bg-primary text-white hover:bg-blue-600"
-                : "bg-primary/50 text-gray-500 cursor-not-allowed"
-            }`}
-          >
-            Post
-          </button>
+        <div className="flex max-w-2xl items-center gap-3">
+          <label htmlFor="new-comment" className="sr-only">Write a comment</label>
+          <input id="new-comment" type="text" maxLength={2000} value={commentInput} onChange={(event) => setCommentInput(event.target.value)} placeholder="Write a comment…" className="flex-grow rounded border px-4 py-2" />
+          <button type="button" onClick={submitComment} disabled={!commentInput.trim() || commentInput.length > 2000} className="rounded bg-primary px-4 py-2 text-white disabled:opacity-50">Post</button>
         </div>
-      ) : (
-        <p className="text-center text-xl font-bold ">
-          Please{" "}
-          <Link to="/login" className="text-primary">
-            Login
-          </Link>{" "}
-          first to put your valuable comment
-        </p>
-      )}
+      ) : <p className="text-center font-bold">Please <Link to="/login" className="text-primary">log in</Link> to comment.</p>}
 
-      <div className="mt-8">
-        {comments.slice(0, commentsToShow).map((comment) => (
-          <div key={comment._id} className="rounded-lg mb-6  p-4">
-            <div className="flex">
-              <img
-                src={comment.createdBy?.profilepic}
-                alt={comment.createdBy?.name || "Unknown"}
-                className="w-10 h-10 rounded-full mr-2"
-              />
-              <div>
-                <span className="font-semibold">
-                  {comment.createdBy?.name || "Unknown"}
-                </span>
-                <div className="flex items-center gap-1 text-sm text-gray-500 mt-1">
-                  <IoMdTime />
-                  <span>{formatDate(comment.createdAt)}</span>
-                </div>
+      {isLoading ? <div role="status" className="mt-8 space-y-3"><div className="skeleton h-20 w-full"/><div className="skeleton h-20 w-full"/></div> : (
+        <div className="mt-8">
+          {comments.length === 0 ? <p className="text-gray-500">No approved comments yet.</p> : comments.map((comment) => (
+            <article key={comment._id} className="mb-6 rounded-lg p-4">
+              <div className="flex items-center gap-2">
+                <img src={comment.createdBy?.profilepic || ""} alt="" className="h-10 w-10 rounded-full object-cover" />
+                <div><p className="font-semibold">{comment.createdBy?.name || "Unknown"}</p><p className="flex items-center gap-1 text-sm text-gray-500"><IoMdTime />{formatDate(comment.createdAt)}</p></div>
               </div>
-            </div>
-            <p className="mt-2 ml-10">{comment.comment}</p>
-            <div className="flex items-center gap-2 text-sm text-gray-500 mt-2 ml-10">
-              <UserReact
-                id={comment._id}
-                likes={comment.likes || 0}
-                dislikes={comment.disLikes || 0}
-                reactions={comment.reactions || []}
-                toggleLike={(id, action) => toggleLike(id, action, "comment")}
-              />
-
-              <button
-                onClick={() => {
-                  if (!user) {
-                    showToast(
-                      "Oops!",
-                      "Only logged-in users can reply.",
-                      "info"
-                    );
-                  } else {
-                    toggleReply(comment._id);
-                  }
-                }}
-                className={`text-blue-500 hover:underline ${
-                  !user ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-              >
-                Reply
-              </button>
-            </div>
-
-            {replyInput[comment._id] !== undefined && (
-              <div className="reply-container mt-2 flex items-center">
-                <input
-                  type="text"
-                  value={replyInput[comment._id]}
-                  onChange={(e) =>
-                    setReplyInput((prev) => ({
-                      ...prev,
-                      [comment._id]: e.target.value,
-                    }))
-                  }
-                  placeholder="Write a reply..."
-                  className="flex-grow border rounded px-4 py-2"
-                />
-                <button
-                  onClick={() => handleReply(comment._id)}
-                  className="ml-2 bg-blue-500 text-white px-4 py-2 rounded"
-                >
-                  Post
-                </button>
+              <p className="ml-12 mt-2 whitespace-pre-wrap">{comment.comment}</p>
+              <div className="ml-12 mt-2 flex items-center gap-3">
+                <UserReact id={comment._id} likes={comment.likes || 0} dislikes={comment.disLikes || 0} reactions={comment.reactions || []} toggleLike={(id, action) => toggleLike(id, action, "comment")} />
+                {user && <button type="button" className="text-blue-600 hover:underline" onClick={() => setReplyInput((state) => ({ ...state, [comment._id]: state[comment._id] === undefined ? "" : undefined }))}>Reply</button>}
               </div>
-            )}
-
-            {comment.replies.length > 0 &&
-              renderReplies(comment.replies, comment._id)}
-          </div>
-        ))}
-      </div>
-
-      {comments.length > commentsToShow && (
-        <button
-          onClick={loadMoreComments}
-          className="text-sm text-blue-500 mt-4 hover:underline"
-        >
-          Load More Comments
-        </button>
+              {replyInput[comment._id] !== undefined && <div className="ml-12 mt-3 flex gap-2"><label htmlFor={`reply-${comment._id}`} className="sr-only">Write a reply</label><input id={`reply-${comment._id}`} maxLength={2000} value={replyInput[comment._id]} onChange={(event) => setReplyInput((state) => ({ ...state, [comment._id]: event.target.value }))} placeholder="Write a reply…" className="flex-1 rounded border px-3 py-2"/><button type="button" disabled={!replyInput[comment._id]?.trim()} onClick={() => submitReply(comment._id)} className="rounded bg-primary px-3 py-2 text-white disabled:opacity-50">Post</button></div>}
+              {(comment.replies || []).map((reply) => <div key={reply._id} className="ml-12 mt-4 border-l-2 border-blue-500 pl-3"><p className="font-semibold">{reply.createdBy?.name || "Unknown"}</p><p className="whitespace-pre-wrap">{reply.comment}</p><UserReact id={reply._id} likes={reply.likes || 0} dislikes={reply.disLikes || 0} reactions={reply.reactions || []} toggleLike={(id, action) => toggleLike(id, action, "reply", comment._id)} /></div>)}
+              {replyErrors[comment._id] && <p role="alert" className="ml-12 mt-2 text-red-600">{replyErrors[comment._id]}</p>}
+              {(!expandedReplies[comment._id] || (replyPages[comment._id]?.pagination?.page < replyPages[comment._id]?.pagination?.totalPages)) && <button type="button" className="ml-12 mt-2 text-sm text-blue-600 hover:underline" onClick={() => loadReplies(comment)}>{expandedReplies[comment._id] ? "Load more replies" : "Load replies"}</button>}
+            </article>
+          ))}
+          {pagination.page < pagination.totalPages && <button type="button" disabled={isLoadingMore} onClick={() => fetchComments(blogId, { page: pagination.page + 1, limit: COMMENT_LIMIT, append: true })} className="rounded border px-4 py-2 disabled:opacity-50">{isLoadingMore ? "Loading…" : "Load more comments"}</button>}
+        </div>
       )}
-    </div>
+    </section>
   );
 }
 

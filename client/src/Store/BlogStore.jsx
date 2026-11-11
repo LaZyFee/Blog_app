@@ -1,134 +1,115 @@
 import { create } from "zustand";
 import axiosInstance from "../Utils/axiosInstance";
 
-const useBlogStore = create((set, get) => ({
-  blogs: [], // Stores the list of blogs
-  loading: false, // Tracks loading state
-  error: null, // Tracks errors
+const initialPagination = { page: 1, limit: 10, totalItems: 0, totalPages: 0 };
+const messageFor = (error, fallback) => error.response?.data?.message || error.message || fallback;
 
-  // Fetch all blogs
-  fetchBlogs: async () => {
+const useBlogStore = create((set, get) => ({
+  blogs: [],
+  blog: null,
+  pagination: initialPagination,
+  loading: false,
+  error: null,
+
+  fetchBlogs: async ({ page = 1, limit = 10, append = false } = {}) => {
     set({ loading: true, error: null });
     try {
-      const response = await axiosInstance.get("/all-blogs");
-      set({ blogs: response.data.Blogs, loading: false });
-    } catch (error) {
-      set({
-        error: error.response?.data?.message || "Failed to fetch blogs",
+      const response = await axiosInstance.get("/all-blogs", { params: { page, limit } });
+      const data = response.data.data || response.data.Blogs || [];
+      set((state) => ({
+        blogs: append ? [...state.blogs, ...data.filter((item) => !state.blogs.some((old) => old._id === item._id))] : data,
+        pagination: response.data.pagination || { ...initialPagination, page, limit, totalItems: data.length, totalPages: 1 },
         loading: false,
-      });
+        error: null,
+      }));
+      return { success: true, data };
+    } catch (error) {
+      set({ error: messageFor(error, "Failed to fetch blogs"), loading: false });
+      return { success: false, error: messageFor(error, "Failed to fetch blogs") };
     }
   },
+
   fetchBlogById: async (id) => {
-    set({ loading: true, error: null });
+    set({ loading: true, error: null, blog: null });
     try {
       const response = await axiosInstance.get(`/blog/${id}`);
-      set({ blog: response.data.blog, loading: false });
+      set({ blog: response.data.blog || response.data.data, loading: false, error: null });
+      return { success: true, data: response.data.blog || response.data.data };
     } catch (error) {
-      set({
-        error: error.response?.data?.message || "Failed to fetch blogs",
-        loading: false,
-      });
+      const message = messageFor(error, "Failed to fetch blog");
+      set({ error: message, loading: false, blog: null });
+      return { success: false, error: message };
     }
   },
 
-  // Create a new blog
   createBlog: async (blogData) => {
     set({ loading: true, error: null });
     try {
       const formData = new FormData();
       formData.append("title", blogData.title);
       formData.append("content", blogData.content);
-      if (blogData.image) {
-        formData.append("image", blogData.image);
-      }
-
-      const response = await axiosInstance.post("/create-blog", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      set((state) => ({
-        blogs: [...state.blogs, response.data.data],
-        loading: false,
-      }));
+      if (blogData.image) formData.append("image", blogData.image);
+      const response = await axiosInstance.post("/create-blog", formData);
+      set((state) => ({ blogs: [response.data.data, ...state.blogs], loading: false, error: null }));
+      return { success: true, data: response.data.data };
     } catch (error) {
-      set({
-        error: error.response?.data?.message || "Failed to create blog",
-        loading: false,
-      });
+      const message = messageFor(error, "Failed to create blog");
+      set({ error: message, loading: false });
+      return { success: false, error: message };
     }
   },
 
-  // Update an existing blog
   updateBlog: async (id, formData) => {
     set({ loading: true, error: null });
     try {
-      const response = await axiosInstance.put(`/update-blog/${id}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      // Update the blogs state immediately
+      const response = await axiosInstance.put(`/update-blog/${id}`, formData);
+      const updatedBlog = response.data.data;
       set((state) => ({
-        blogs: state.blogs.map((blog) =>
-          blog._id === id ? { ...blog, ...response.data } : blog
-        ),
+        blogs: state.blogs.map((blog) => blog._id === id ? updatedBlog : blog),
+        blog: state.blog?._id === id ? updatedBlog : state.blog,
         loading: false,
+        error: null,
       }));
+      return { success: true, data: updatedBlog };
     } catch (error) {
-      set({
-        error: error.response?.data?.message || "Failed to update blog",
-        loading: false,
-      });
+      const message = messageFor(error, "Failed to update blog");
+      set({ error: message, loading: false });
+      return { success: false, error: message };
     }
   },
 
-  // Delete a blog
   deleteBlog: async (id) => {
     set({ loading: true, error: null });
     try {
       await axiosInstance.delete(`/delete-blog/${id}`);
-      set((state) => ({
-        blogs: state.blogs.filter((blog) => blog._id !== id),
-        loading: false,
-      }));
+      set((state) => ({ blogs: state.blogs.filter((blog) => blog._id !== id), blog: state.blog?._id === id ? null : state.blog, loading: false, error: null }));
+      return { success: true };
     } catch (error) {
-      set({
-        error: error.response?.data?.message || "Failed to delete blog",
-        loading: false,
-      });
-      console.error("Error deleting blog:", error);
+      const message = messageFor(error, "Failed to delete blog");
+      set({ error: message, loading: false });
+      return { success: false, error: message };
     }
   },
 
-  // Toggle like or dislike for a blog
   toggleLike: async (id, action, type = "blog") => {
-    const { blogs } = get();
     try {
-      const response = await axiosInstance.patch(`/${id}/like-unlike`, null, {
-        params: { action, type },
-      });
-
-      const updatedData = response.data.data;
-
-      // Update the specific blog in the state
-      set({
-        blogs: blogs.map((blog) =>
-          blog._id === id
-            ? {
-                ...blog,
-                likes: updatedData.likes || 0,
-                dislikes: updatedData.dislikes || 0,
-                userReaction: updatedData.userReaction || null,
-              }
-            : blog
-        ),
-      });
+      const response = await axiosInstance.patch(`/${id}/like-unlike`, null, { params: { action, type } });
+      const updated = response.data.data;
+      set((state) => ({
+        blogs: state.blogs.map((blog) => blog._id === id ? { ...blog, likes: updated.likes, disLikes: updated.dislikes, userReaction: updated.userReaction } : blog),
+        blog: state.blog?._id === id ? { ...state.blog, likes: updated.likes, disLikes: updated.dislikes, userReaction: updated.userReaction } : state.blog,
+        error: null,
+      }));
+      return { success: true, data: updated };
     } catch (error) {
-      console.error("Error toggling like:", error.message);
-      set({ error: error.response?.data?.message || "Failed to toggle like" });
+      const message = messageFor(error, "Failed to toggle reaction");
+      set({ error: message });
+      return { success: false, error: message };
     }
   },
+
+  clearError: () => set({ error: null }),
+  reset: () => set({ blogs: [], blog: null, pagination: initialPagination, loading: false, error: null }),
 }));
 
 export default useBlogStore;
