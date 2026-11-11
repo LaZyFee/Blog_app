@@ -1,89 +1,47 @@
 /* eslint-disable */
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { SlDislike, SlLike } from "react-icons/sl";
 import { AiFillLike } from "react-icons/ai";
 import { BiSolidDislike } from "react-icons/bi";
 import { useAuth } from "../Store/AuthStore";
 import showToast from "./ShowToast";
 
-const UserReact = ({ id, likes, dislikes, reactions, toggleLike }) => {
+const getReaction = (reactions, userId) => {
+  const reaction = (Array.isArray(reactions) ? reactions : []).find((item) => (item.user?._id || item.user)?.toString() === userId?.toString());
+  return reaction?.type || null;
+};
+
+const UserReact = ({ id, likes = 0, dislikes = 0, reactions = [], toggleLike }) => {
   const { user } = useAuth();
-  const [likeStatus, setLikeStatus] = useState(null); // 'like', 'dislike', or null
-  const [currentLikes, setLikes] = useState(likes || 0);
-  const [currentDislikes, setDislikes] = useState(dislikes || 0);
+  const [likeStatus, setLikeStatus] = useState(null);
+  const [currentLikes, setLikes] = useState(Number(likes) || 0);
+  const [currentDislikes, setDislikes] = useState(Number(dislikes) || 0);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (user?._id) {
-      const reactionsArray = Array.isArray(reactions) ? reactions : [];
-      const userReaction = reactionsArray.find(
-        (reaction) => reaction.user === user._id
-      );
-      if (userReaction) {
-        setLikeStatus(userReaction.type); // 'like' or 'dislike'
-      }
-    }
-  }, [user?._id, reactions]);
+    setLikes(Number(likes) || 0);
+    setDislikes(Number(dislikes) || 0);
+    setLikeStatus(getReaction(reactions, user?._id));
+  }, [id, likes, dislikes, reactions, user?._id]);
 
   const handleReaction = async (type) => {
-    if (!user) {
-      // Show the toast and prevent any state changes
-      showToast("Oops!", "Only logged-in users can react.", "info");
-      return;
-    }
-
+    if (!user) return showToast("Oops!", "Only logged-in users can react.", "info");
+    if (submitting) return;
     const action = likeStatus === type ? "none" : type;
-
+    setSubmitting(true);
     try {
-      await toggleLike(id, action);
-
-      if (type === "like") {
-        if (action === "like") {
-          setLikes((prev) => prev + 1);
-          if (likeStatus === "dislike") {
-            setDislikes((prev) => prev - 1);
-          }
-        } else if (action === "none") {
-          setLikes((prev) => prev - 1);
-        }
-      } else if (type === "dislike") {
-        if (action === "dislike") {
-          setDislikes((prev) => prev + 1);
-          if (likeStatus === "like") {
-            setLikes((prev) => prev - 1);
-          }
-        } else if (action === "none") {
-          setDislikes((prev) => prev - 1);
-        }
-      }
-
-      setLikeStatus(action);
-    } catch (error) {
-      console.error("Failed to toggle reaction:", error.message);
+      const result = await toggleLike(id, action);
+      if (!result?.success) return;
+      const updated = result.data;
+      setLikes(Number(updated.likes) || 0);
+      setDislikes(Number(updated.dislikes) || 0);
+      setLikeStatus(updated.userReaction || null);
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  return (
-    <div className="flex items-center gap-4">
-      <button
-        onClick={() => handleReaction("like")}
-        className={`flex items-center gap-1 ${
-          likeStatus === "like" ? "text-blue-500" : "text-gray-500"
-        }`}
-      >
-        {likeStatus === "like" ? <AiFillLike /> : <SlLike />}
-        <span>{currentLikes}</span>
-      </button>
-      <button
-        onClick={() => handleReaction("dislike")}
-        className={`flex items-center gap-1 ${
-          likeStatus === "dislike" ? "text-red-500" : "text-gray-500"
-        }`}
-      >
-        {likeStatus === "dislike" ? <BiSolidDislike /> : <SlDislike />}
-        <span>{currentDislikes}</span>
-      </button>
-    </div>
-  );
+  return <div className="flex items-center gap-4"><button type="button" disabled={submitting} aria-pressed={likeStatus === "like"} onClick={() => handleReaction("like")} className={`flex items-center gap-1 disabled:opacity-50 ${likeStatus === "like" ? "text-blue-500" : "text-gray-500"}`}>{likeStatus === "like" ? <AiFillLike /> : <SlLike />}<span>{currentLikes}</span></button><button type="button" disabled={submitting} aria-pressed={likeStatus === "dislike"} onClick={() => handleReaction("dislike")} className={`flex items-center gap-1 disabled:opacity-50 ${likeStatus === "dislike" ? "text-red-500" : "text-gray-500"}`}>{likeStatus === "dislike" ? <BiSolidDislike /> : <SlDislike />}<span>{currentDislikes}</span></button></div>;
 };
 
 export default UserReact;
